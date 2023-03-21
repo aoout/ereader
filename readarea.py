@@ -7,17 +7,16 @@ from qfluentwidgets import ScrollArea, ExpandLayout
 from epubparser import EpubParser
 
 
-class ReadArea(ScrollArea):
+class ReadArea(QWidget):
     def __init__(self) -> None:
         """
         Initialize EpubWindow
         """
         super().__init__()
 
-        self.scrollWidget = QWidget()
-        self.expandLayout = ExpandLayout(self.scrollWidget)
+        self.hboxLayout = QHBoxLayout()
         self.webview = QWebEngineView(self)
-        self.expandLayout.addWidget(self.webview)
+        self.hboxLayout.addWidget(self.webview)
 
         self.webview.page().scrollPositionChanged.connect(self.on_scroll)
 
@@ -46,7 +45,7 @@ class ReadArea(ScrollArea):
         """
         self.epub_parser = EpubParser(filename)
         self.webview.setHtml('')
-        self.webview.setHtml(self.epub_parser._get_page_content(0))
+        self.webview.setHtml(self.epub_parser.get_page_content(0))
         logging.info(f"Loaded HTML file: {self.epub_parser.pages_path[0]}")
 
     def on_scroll(self) -> None:
@@ -57,15 +56,29 @@ class ReadArea(ScrollArea):
 
         if self.webview.page().scrollPosition().y() >= self.webview.page().contentsSize().height() - self.webview.height():
             self.load_next_page()
+        elif self.webview.page().scrollPosition().y() == 0:
+            self.load_pre_page()
 
     def load_next_page(self) -> None:
         """
         Load the next page
         """
 
-        content = self.epub_parser.get_next_page_content()
-        if content:
-            self.webview.setHtml(content)
+        if self.epub_parser.current_page_index != len(self.epub_parser.pages_path)-1:
+            self.webview.setHtml(self.epub_parser.get_page_content(self.epub_parser.current_page_index))
+            self.epub_parser.current_page_index += 1
+            logging.info(f"Loaded HTML file: {self.epub_parser.pages_path[self.epub_parser.current_page_index]}")
+        else:
+            logging.info("No more HTML files to load")
+
+    def load_pre_page(self) -> None:
+        """
+        Load the previous page
+        """
+
+        if self.epub_parser.current_page_index != 0:
+            self.webview.setHtml(self.epub_parser.get_page_content(self.epub_parser.current_page_index-1))
+            self.epub_parser.current_page_index -= 1
             logging.info(f"Loaded HTML file: {self.epub_parser.pages_path[self.epub_parser.current_page_index]}")
         else:
             logging.info("No more HTML files to load")

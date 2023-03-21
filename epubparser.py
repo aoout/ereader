@@ -37,26 +37,10 @@ class EpubParser:
         pages.sort()
         return pages
 
-
-    def get_next_page_content(self) -> str:
-        """
-        Get next page content
-        """
-        if self._has_next_page():
-            self.current_page_index += 1
-            return self._get_page_content(self.current_page_index)
-        else:
-            return None
-
-    def _get_page_content(self, index: int) -> str:
+    def get_page_content(self, index: int) -> str:
         """
         Get page content by index
         """
         with open(self.pages_path[index], 'r', encoding='utf-8') as f:
             page_content = f.read()
         return page_content
-    def _has_next_page(self) -> bool:
-        """
-        Check if there is next page
-        """
-        return self.current_page_index < len(self.pages_path) - 1
