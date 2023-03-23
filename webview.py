@@ -2,8 +2,7 @@ from queue import Queue
 from typing import Callable
 
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtWidgets import QApplication,QWidget
-from PyQt5 import QtGui
+from PyQt5.QtWidgets import QWidget
 
 
 class WebView(QWebEngineView):
@@ -29,6 +28,10 @@ class WebView(QWebEngineView):
         func (Callable): The function to run.
         """
         self._loadFinishedQueue.put(func)
+
+    def runINL(self,func:Callable)->None:
+        if not self.loading:
+            func()
 
     def _on_loadStarted(self) -> None:
         self.loading = True

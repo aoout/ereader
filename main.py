@@ -1,5 +1,6 @@
 import logging
 import sys
+
 from PyQt5.QtWidgets import QApplication
 
 from ereader import EReader

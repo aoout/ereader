@@ -1,14 +1,14 @@
 import logging
 
-from PyQt5 import QtGui
-from PyQt5.QtWidgets import QWidget, QFileDialog,QShortcut,QApplication
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt,pyqtSignal
+from PyQt5 import QtGui
+from PyQt5.QtCore import Qt
+from PyQt5.QtWebEngineWidgets import QWebEngineSettings
+from PyQt5.QtWidgets import QWidget, QFileDialog, QShortcut, QApplication
 
 from epubparser import EpubParser
-from webview import WebView
-from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 from utils import add_css_to_html
+from webview import WebView
 
 
 class ReadView(WebView):
@@ -25,8 +25,7 @@ class ReadView(WebView):
         self.bindShortcutKeys()
 
     def bindShortcutKeys(self) -> None:
-        def shortcut(key, func) -> None:
-            QShortcut(QtGui.QKeySequence(key), self).activated.connect(func)
+        shortcut = lambda key,func:QShortcut(QtGui.QKeySequence(key), self).activated.connect(func)
 
         shortcut("A",self.load_pre_page)
         shortcut("D",self.load_next_page)
@@ -34,51 +33,29 @@ class ReadView(WebView):
         shortcut(Qt.Key_Right,self.load_next_page)
 
         shortcut("O",self.open_epub)
-        def up()->None:
-            if not self.loading:
-                self.page().runJavaScript("window.scrollBy(0, -window.innerHeight/20);")
-        def down()->None:
-            if not self.loading:
-                self.page().runJavaScript("window.scrollBy(0, window.innerHeight/20);")
-        def home()->None:
-            if not self.loading:
-                self.page().runJavaScript("window.scrollTo(0, 0);")
-        def end()->None:
-            if not self.loading:
-                self.page().runJavaScript("window.scrollTo(0, document.body.scrollHeight);")
-        def pageUp()->None:
-            if not self.loading:
-                self.page().runJavaScript("window.scrollBy(0, -window.innerHeight);")
-        def pageDown()->None:
-            if not self.loading:
-                self.page().runJavaScript("window.scrollBy(0, window.innerHeight);")
-        def quit()->None:
-            QApplication.quit()
+
+
+        up = lambda :self.runINL(lambda :self.page().runJavaScript("window.scrollBy(0, -window.innerHeight/20);"))
+        down = lambda :self.runINL(lambda :self.page().runJavaScript("window.scrollBy(0, window.innerHeight/20);"))
 
         shortcut("W",up)
         shortcut("S",down)
         shortcut(Qt.Key_Up,up)
         shortcut(Qt.Key_Down,down)
 
-        shortcut(Qt.Key_Home,home)
-        shortcut(Qt.Key_End,end)
-        shortcut(Qt.Key_PageUp,pageUp)
-        shortcut(Qt.Key_PageDown,pageDown)
+        shortcut(Qt.Key_Home,lambda :self.runINL(lambda :self.page().runJavaScript("window.scrollTo(0, 0);")))
+        shortcut(Qt.Key_End,lambda :self.runINL(lambda :self.page().runJavaScript("window.scrollTo(0, document.body.scrollHeight);")))
+        shortcut(Qt.Key_PageUp,lambda :self.runINL(lambda :self.page().runJavaScript("window.scrollBy(0, -window.innerHeight);")))
+        shortcut(Qt.Key_PageDown,lambda :self.runINL(lambda :self.page().runJavaScript("window.scrollBy(0, window.innerHeight);")))
 
-        shortcut("Q",quit)
-
-
-
-
+        shortcut("Q",lambda :QApplication.quit())
 
     def setHtml(self, html: str, baseUrl: QtCore.QUrl = QtCore.QUrl("")) -> None:
-        with open("ereader.css", "r") as f:
-            css = f.read()
-        html = add_css_to_html(css,html)
-        for css in self.epub_parser.css_path:
-            with open(css, "r") as f:
-                css = f.read()
-            html = add_css_to_html(css,html)
+
+        css_path = self.epub_parser.css_path + ["ereader.css"]
+        for css in css_path:
+            with open(css,"r") as f:
+                html = add_css_to_html(f.read(),html)
         super().setHtml(html,baseUrl)
 
 

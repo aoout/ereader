@@ -2,9 +2,8 @@ import os
 import shutil
 import tempfile
 import zipfile
-from functools import cached_property
 from pathlib import Path
-from typing import List,Tuple
+from typing import List, Tuple
 
 import xmltodict
 
@@ -17,15 +16,18 @@ class EpubParser:
         self.filename = filename
         self.tempdir = Path(tempfile.TemporaryDirectory().name)
         self.current_page_index = 0
+        self.extract()
+        self.opf_file = next(Path(self.tempdir).rglob('content.opf'), None)
+        self.tempdir = self.opf_file.parent
+
+        self.pages_path ,self.css_path = self.parse()
+
+    def extract(self):
         if self.tempdir.exists():
             shutil.rmtree(self.tempdir)
         os.makedirs(self.tempdir)
         with zipfile.ZipFile(self.filename, 'r') as zip_ref:
             zip_ref.extractall(self.tempdir)
-        self.opf_file = path = next(Path(self.tempdir).rglob('content.opf'), None)
-        self.tempdir = self.opf_file.parent
-
-        self.pages_path ,self.css_path = self.parse()
 
     def parse(self) -> Tuple[List[str],List[str]]:
 
