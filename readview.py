@@ -2,9 +2,11 @@ import logging
 
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QWidget, QFileDialog
+from PyQt5 import QtCore
 
 from epubparser import EpubParser
 from webview import WebView
+from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 
 
 class ReadView(WebView):
@@ -13,8 +15,25 @@ class ReadView(WebView):
         Initialize EpubWindow
         """
         super().__init__(parent)
-
+        settings = QWebEngineSettings.globalSettings()
+        settings.setFontFamily(QWebEngineSettings.StandardFont,"LXGW WenKai")
         self.epub_parser = None
+
+    def setHtml(self, html: str, baseUrl: QtCore.QUrl = QtCore.QUrl("")) -> None:
+        super().setHtml(html,baseUrl)
+        self.runALF(self.set_css)
+
+    def set_css(self):
+        with open("ereader.css", "r") as f:
+            css = f.read()
+        script = """
+               (function() {
+                   var style = document.createElement('style');
+                   style.innerHTML = '%s';
+                   document.head.appendChild(style);
+               })();
+           """ % css.replace('\n', '\\n').replace("'", "\\'")
+        self.page().runJavaScript(script)
 
     def open_epub(self) -> None:
         """
@@ -47,7 +66,6 @@ class ReadView(WebView):
         """
         Load the next page
         """
-
         if self.epub_parser.current_page_index != len(self.epub_parser.pages_path)-1:
             self.setHtml(self.epub_parser.get_page_content(self.epub_parser.current_page_index))
             self.epub_parser.current_page_index += 1

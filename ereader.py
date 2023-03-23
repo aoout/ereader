@@ -24,7 +24,7 @@ class EReader(FramelessWindow):
 
         self.hBoxLayout = QHBoxLayout(self)
         self.epub_window = ReadView(self)
-        self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.hBoxLayout.setContentsMargins(0, 40, 0, 0)
         self.hBoxLayout.addWidget(self.epub_window)
         self.setLayout(self.hBoxLayout)
 
