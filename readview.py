@@ -27,10 +27,13 @@ class ReadView(WebView):
     def bindShortcutKeys(self) -> None:
         def shortcut(key, func) -> None:
             QShortcut(QtGui.QKeySequence(key), self).activated.connect(func)
+
         shortcut("A",self.load_pre_page)
         shortcut("D",self.load_next_page)
         shortcut(Qt.Key_Left,self.load_pre_page)
         shortcut(Qt.Key_Right,self.load_next_page)
+
+        shortcut("O",self.open_epub)
         def up()->None:
             if not self.loading:
                 self.page().runJavaScript("window.scrollBy(0, -window.innerHeight/20);")
@@ -63,6 +66,8 @@ class ReadView(WebView):
         shortcut(Qt.Key_PageDown,pageDown)
 
         shortcut("Q",quit)
+
+
 
 
 
