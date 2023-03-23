@@ -41,7 +41,4 @@ class WebView(QWebEngineView):
         while not self._loadFinishedQueue.empty():
             self._loadFinishedQueue.get()()
 
-    def mousePressEvent(self, a0: QtGui.QMouseEvent) -> None:
-        print(3333)
-
 
