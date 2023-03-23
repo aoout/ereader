@@ -7,7 +7,7 @@ from PyQt5 import QtCore
 from epubparser import EpubParser
 from webview import WebView
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
-
+from utils import add_css_to_html
 
 class ReadView(WebView):
     def __init__(self,parent:QWidget = None) -> None:
@@ -20,20 +20,11 @@ class ReadView(WebView):
         self.epub_parser = None
 
     def setHtml(self, html: str, baseUrl: QtCore.QUrl = QtCore.QUrl("")) -> None:
-        super().setHtml(html,baseUrl)
-        self.runALF(self.set_css)
-
-    def set_css(self):
         with open("ereader.css", "r") as f:
             css = f.read()
-        script = """
-               (function() {
-                   var style = document.createElement('style');
-                   style.innerHTML = '%s';
-                   document.head.appendChild(style);
-               })();
-           """ % css.replace('\n', '\\n').replace("'", "\\'")
-        self.page().runJavaScript(script)
+        html = add_css_to_html(css,html)
+        super().setHtml(html,baseUrl)
+
 
     def open_epub(self) -> None:
         """
