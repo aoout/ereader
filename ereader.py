@@ -30,4 +30,7 @@ class EReader(FramelessWindow):
 
         self.titleBar.raise_()
 
+        with open("ereader.qss","r") as f:
+            self.setStyleSheet(f.read())
+
         self.show()
