@@ -4,7 +4,7 @@ import tempfile
 import zipfile
 from functools import cached_property
 from pathlib import Path
-from typing import List
+from typing import List,Tuple
 
 import xmltodict
 
@@ -18,9 +18,9 @@ class EpubParser:
         self.tempdir = Path(tempfile.TemporaryDirectory().name)
         self.current_page_index = 0
         self.opf_file = self.tempdir / 'content.opf'
+        self.pages_path ,self.css_path = self.parse()
 
-    @cached_property
-    def pages_path(self) -> List[str]:
+    def parse(self) -> Tuple[List[str],List[str]]:
         if self.tempdir.exists():
             shutil.rmtree(self.tempdir)
         os.makedirs(self.tempdir)
@@ -35,7 +35,8 @@ class EpubParser:
         pages = [self.tempdir / item['@href'] for item in manifest['item'] if
                            item['@media-type'] == 'application/xhtml+xml']
         pages.sort()
-        return pages
+        css = [self.tempdir /item['@href'] for item in manifest['item'] if item['@media-type'] == 'text/css']
+        return pages,css
 
     def get_page_content(self, index: int) -> str:
         """
@@ -44,3 +45,4 @@ class EpubParser:
         with open(self.pages_path[index], 'r', encoding='utf-8') as f:
             page_content = f.read()
         return page_content
+

@@ -23,6 +23,10 @@ class ReadView(WebView):
         with open("ereader.css", "r") as f:
             css = f.read()
         html = add_css_to_html(css,html)
+        for css in self.epub_parser.css_path:
+            with open(css, "r") as f:
+                css = f.read()
+            html = add_css_to_html(css,html)
         super().setHtml(html,baseUrl)
 
 
