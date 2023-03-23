@@ -3,7 +3,7 @@ import logging
 from PyQt5.QtWidgets import QApplication, QHBoxLayout
 from qframelesswindow import FramelessWindow, StandardTitleBar
 
-from readarea import ReadArea
+from readview import ReadView
 
 logging.basicConfig(level=logging.INFO)
 
@@ -23,9 +23,10 @@ class EReader(FramelessWindow):
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
 
         self.hBoxLayout = QHBoxLayout(self)
-        self.epub_window = ReadArea()
+        self.epub_window = ReadView(self)
         self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
         self.hBoxLayout.addWidget(self.epub_window)
+        self.setLayout(self.hBoxLayout)
 
         self.titleBar.raise_()
 
