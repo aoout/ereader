@@ -11,5 +11,6 @@ if __name__ == '__main__':
     app = QApplication([])
     ereader = EReader()
     ereader.epub_window.open_epub()
-    app.exec_()
     logging.info("Exiting EReader")
+    logging.shutdown()
+    app.exec_()
