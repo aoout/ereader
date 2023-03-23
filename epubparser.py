@@ -17,15 +17,18 @@ class EpubParser:
         self.filename = filename
         self.tempdir = Path(tempfile.TemporaryDirectory().name)
         self.current_page_index = 0
-        self.opf_file = self.tempdir / 'content.opf'
-        self.pages_path ,self.css_path = self.parse()
-
-    def parse(self) -> Tuple[List[str],List[str]]:
         if self.tempdir.exists():
             shutil.rmtree(self.tempdir)
         os.makedirs(self.tempdir)
         with zipfile.ZipFile(self.filename, 'r') as zip_ref:
             zip_ref.extractall(self.tempdir)
+        self.opf_file = path = next(Path(self.tempdir).rglob('content.opf'), None)
+        self.tempdir = self.opf_file.parent
+
+        self.pages_path ,self.css_path = self.parse()
+
+    def parse(self) -> Tuple[List[str],List[str]]:
+
 
         with open(self.opf_file, 'r', encoding='utf-8') as f:
             opf_content = f.read()
