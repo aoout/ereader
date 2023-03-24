@@ -35,9 +35,7 @@ class ReadView(WebView):
         settings = QWebEngineSettings.globalSettings()
         fontFamily = self.settings.get("fontFamily","LXGW WenKai")
         settings.setFontFamily(QWebEngineSettings.StandardFont, fontFamily)
-        print(self.settings)
         fontSize = self.settings.get("fontSize",24)
-        print(f"fontSize={fontSize}")
         settings.setFontSize(QWebEngineSettings.DefaultFontSize, fontSize)
 
     def onScrollPositionChanged(self, x) -> None:
@@ -47,7 +45,6 @@ class ReadView(WebView):
         self.page().runJavaScript("window.scrollY", setScrollHeight)
 
     def currentReadProgress(self) -> dict:
-        print(self.scrollHeight)
         return {"pageIndex":self.epubParser.current_page_index, "scrollHeight":self.scrollHeight}
 
     def gotoReadProgress(self, readProgress: dict) -> None:
@@ -107,7 +104,6 @@ class ReadView(WebView):
         """
         epubPath, _ = QFileDialog.getOpenFileName(self, 'Open EPUB', '', 'EPUB files (*.epub)')
         if epubPath:
-            logging.info(f"Opening EPUB file: {epubPath}")
             self.loadEpub(epubPath)
 
     def loadEpub(self, epubPath: str) -> None:
@@ -116,7 +112,6 @@ class ReadView(WebView):
         """
         self.epubParser = EpubParser(epubPath)
         self.setHtmlFromFile(self.epubParser.currentPagePath())
-        logging.info(f"Loaded HTML file: {self.epubParser.pages_path[0]}")
         data["currentEpubPath"] = epubPath
         data.save()
 
@@ -141,10 +136,7 @@ class ReadView(WebView):
         if 0 <= index <= len(self.epubParser.pages_path) - 1:
             self.epubParser.current_page_index = index
             self.setHtmlFromFile(self.epubParser.currentPagePath())
-            logging.info(f"Loaded HTML file: {self.epubParser.currentPagePath()}")
             self.runALF(scroll)
-        else:
-            logging.info("No that HTML files to load")
 
     def scrollToTop(self,func:Callable = None) -> None:
         if not func:
