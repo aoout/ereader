@@ -13,4 +13,5 @@ python main.py "D://book.epub"(optional)
 - [x] picture support
 - [x] inline link support
 - [ ] bookmark support
+- [ ] record reading progress
 
