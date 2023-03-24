@@ -1,6 +1,7 @@
 import logging
 import os.path
 from pathlib import Path
+from collections import  namedtuple
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -11,7 +12,9 @@ from PyQt5.QtWidgets import QWidget, QFileDialog, QShortcut, QApplication
 from epubparser import EpubParser
 from utils import add_css_to_html
 from webview import WebView
+from persistentdict import data
 
+readingProgress = namedtuple("readingProgress",["pageIndex","scrollHeight"])
 
 class ReadView(WebView):
     def __init__(self, parent: QWidget = None) -> None:
@@ -25,6 +28,15 @@ class ReadView(WebView):
         self.epub_parser = None
 
         self.bindShortcutKeys()
+
+
+    def currentReadProgress(self) -> readingProgress:
+        return readingProgress(pageIndex=self.epub_parser.current_page_index,scrollHeight=self.page().scrollPosition().y())
+
+    def gotoReadProgress(self,rp:tuple) -> None:
+        rp = readingProgress(*rp)
+        self.runINL(lambda :self.load_page(rp.pageIndex))\
+    #     scroll
 
     def bindShortcutKeys(self) -> None:
         shortcut = lambda key, func: QShortcut(QtGui.QKeySequence(key), self).activated.connect(func)
@@ -85,6 +97,8 @@ class ReadView(WebView):
         self.epub_parser = EpubParser(filename)
         self.setHtmlFromFile(self.epub_parser.current_page_path())
         logging.info(f"Loaded HTML file: {self.epub_parser.pages_path[0]}")
+        data["currentEpubPath"] = filename
+        data.save()
 
     def wheelEvent(self, e: QtGui.QWheelEvent) -> None:
         if not self.loading:

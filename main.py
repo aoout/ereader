@@ -1,9 +1,12 @@
 import logging
 import sys
+import os
 
 from PyQt5.QtWidgets import QApplication
 
 from ereader import EReader
+from persistentdict import data
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -12,9 +15,17 @@ if __name__ == '__main__':
     app = QApplication([])
     ereader = EReader()
     if len(sys.argv) == 1:
-        ereader.epub_window.open_epub()
+        if epub:=data.get("currentEpubPath"):
+            ereader.epub_window.load_epub(epub)
+        else:
+            ereader.epub_window.open_epub()
     if len(sys.argv) == 2:
         ereader.epub_window.load_epub(sys.argv[1])
+    if rp:=data.get("currentReadProgress"):
+        ereader.epub_window.gotoReadProgress(rp)
+
     app.exec_()
+    data["currentReadProgress"] = tuple( ereader.epub_window.currentReadProgress())
+    data.save()
     logging.shutdown()
     logging.info("Exiting EReader")
