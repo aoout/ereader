@@ -29,3 +29,4 @@ class PersistentDict(UserDict):
 
 
 data = PersistentDict(os.path.expanduser("~//.ereader"))
+data["currentReadProgress"] = data.get("currentReadProgress",{})

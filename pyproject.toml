@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "ereader"
+version = "0.1.0"
+description = ""
+authors = ["aoout <wuz66280@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fire = "^0.5.0"
+pyqt5 = "^5.15.9"
+xmltodict = "^0.13.0"
+pyqtwebengine = "^5.15.6"
+pyqt5-frameless-window = "^0.2.3"
+bs4 = "^0.0.1"
+
+[[tool.poetry.source]]
+name = "tsinghua"
+url = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple/"
+default = true
+
+[tool.poetry.scripts]
+ereader = "ereader.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

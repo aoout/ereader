@@ -1,7 +1,7 @@
 import logging
 import os.path
-from collections import namedtuple
 from pathlib import Path
+from typing import Callable
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -9,20 +9,20 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 from PyQt5.QtWidgets import QWidget, QFileDialog, QShortcut, QApplication
 
-from epubparser import EpubParser
-from persistentdict import data
-from utils import addCssToHtml
-from webview import WebView
+from .epubparser import EpubParser
+from .persistentdict import data
+from .utils import addCssToHtml
+from .webview import WebView
 
-readingProgress = namedtuple("readingProgress", ["pageIndex", "scrollHeight"])
 
 
 class ReadView(WebView):
-    def __init__(self, parent: QWidget = None) -> None:
+    def __init__(self, parent: QWidget = None,settings:dict={}) -> None:
         """
         Initialize EpubWindow
         """
         super().__init__(parent)
+        self.settings = settings
         self._setFont()
         self.epubParser = None
 
@@ -30,10 +30,15 @@ class ReadView(WebView):
         self.scrollHeight = None
         self.page().scrollPositionChanged.connect(self.onScrollPositionChanged)
 
+
     def _setFont(self):
         settings = QWebEngineSettings.globalSettings()
-        settings.setFontFamily(QWebEngineSettings.StandardFont, "LXGW WenKai")
-        settings.setFontSize(QWebEngineSettings.DefaultFontSize, 24)
+        fontFamily = self.settings.get("fontFamily","LXGW WenKai")
+        settings.setFontFamily(QWebEngineSettings.StandardFont, fontFamily)
+        print(self.settings)
+        fontSize = self.settings.get("fontSize",24)
+        print(f"fontSize={fontSize}")
+        settings.setFontSize(QWebEngineSettings.DefaultFontSize, fontSize)
 
     def onScrollPositionChanged(self, x) -> None:
         def setScrollHeight(height:int) -> None:
@@ -41,27 +46,33 @@ class ReadView(WebView):
 
         self.page().runJavaScript("window.scrollY", setScrollHeight)
 
-    def currentReadProgress(self) -> readingProgress:
+    def currentReadProgress(self) -> dict:
         print(self.scrollHeight)
-        return readingProgress(pageIndex=self.epubParser.current_page_index, scrollHeight=self.scrollHeight)
+        return {"pageIndex":self.epubParser.current_page_index, "scrollHeight":self.scrollHeight}
 
-    def gotoReadProgress(self, rp: tuple) -> None:
-        rp = readingProgress(*rp)
-        self.runINL(lambda: self.loadPage(rp.pageIndex))
-        self.runALF(lambda: self.page().runJavaScript(f"window.scrollTo(0,{rp.scrollHeight});"))
+    def gotoReadProgress(self, readProgress: dict) -> None:
+        self.runINL(lambda: self.loadPage(readProgress["pageIndex"]))
+        self.runALF(lambda: self.page().runJavaScript(f"window.scrollTo(0,{readProgress['scrollHeight']});"))
 
     def bindShortcutKeys(self) -> None:
         shortcut = lambda key, func: QShortcut(QtGui.QKeySequence(key), self).activated.connect(func)
 
-        shortcut("A", self.loadPrePage)
-        shortcut("D", self.loadNextPage)
-        shortcut("left", self.loadPrePage)
-        shortcut("right", self.loadNextPage)
+        def shiftUp() -> None:
+            self.loadPrePage()
+            self.scrollToTop()
+        def shiftDown() -> None:
+            self.loadNextPage()
+            self.scrollToTop()
+
+        shortcut("A", shiftUp)
+        shortcut("D", shiftDown)
+        shortcut("left", shiftUp)
+        shortcut("right", shiftDown)
 
         shortcut("home", self.scrollToTop)
         shortcut("end", self.scrollToButton)
 
-        shortcut("O", self.oepnEpub)
+        shortcut("O", self.openEpub)
 
         up = lambda: self.runINL(lambda: self.page().runJavaScript("window.scrollBy(0, -window.innerHeight/20);"))
         down = lambda: self.runINL(lambda: self.page().runJavaScript("window.scrollBy(0, window.innerHeight/20);"))
@@ -86,13 +97,13 @@ class ReadView(WebView):
 
         with open(file, "r") as f:
             html = f.read()
-        css_path = self.epubParser.css_path + ["ereader.css"]
+        css_path = self.epubParser.css_path + ["ereader/ereader.css"]
         for css in css_path:
             with open(css, "r") as f:
                 html = addCssToHtml(f.read(), html)
         self.setHtml(html, baseUrl=QtCore.QUrl.fromLocalFile(str(file.parent) + os.path.sep))
 
-    def oepnEpub(self) -> None:
+    def openEpub(self) -> None:
         """
         Open EPUB file
         """
@@ -101,14 +112,14 @@ class ReadView(WebView):
             logging.info(f"Opening EPUB file: {epubPath}")
             self.loadEpub(epubPath)
 
-    def loadEpub(self, filename: str) -> None:
+    def loadEpub(self, epubPath: str) -> None:
         """
         Load EPUB file
         """
-        self.epubParser = EpubParser(filename)
+        self.epubParser = EpubParser(epubPath)
         self.setHtmlFromFile(self.epubParser.currentPagePath())
         logging.info(f"Loaded HTML file: {self.epubParser.pages_path[0]}")
-        data["currentEpubPath"] = filename
+        data["currentEpubPath"] = epubPath
         data.save()
 
     def wheelEvent(self, e: QtGui.QWheelEvent) -> None:
@@ -116,7 +127,7 @@ class ReadView(WebView):
             bias = e.angleDelta().y()
             if bias > 0:
                 self.loadPrePage()
-                self.scrollToButton()
+                self.scrollToButton(func=self.runALF)
             else:
                 self.loadNextPage()
 
@@ -134,7 +145,11 @@ class ReadView(WebView):
         else:
             logging.info("No that HTML files to load")
 
-    def scrollToTop(self) -> None:
-        self.runALF(lambda: self.page().runJavaScript("window.scrollTo(0, 0);"))
-    def scrollToButton(self) -> None:
-        self.runALF(lambda: self.page().runJavaScript("window.scrollTo(0, document.body.scrollHeight);"))
+    def scrollToTop(self,func:Callable = None) -> None:
+        if not func:
+            func = self.runINL
+        func (lambda: self.page().runJavaScript("window.scrollTo(0, 0);"))
+    def scrollToButton(self,func:Callable = None) -> None:
+        if not func:
+            func = self.runINL
+        func (lambda: self.page().runJavaScript("window.scrollTo(0, document.body.scrollHeight);"))
