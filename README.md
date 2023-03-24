@@ -12,6 +12,10 @@ ereader --epubPath="D:\14777\Books\宇航服防尘指南.epub" --fontSize=28
 - [x] picture support
 - [x] inline link support
 - [ ] bookmark support
+    - [ ] cli bookmark support
+    - [ ] gui bookmark support
 - [x] record reading progress
 - [x] more cli parameter
+- [ ] epub data cache
+- [ ] book management(just cli)
 
