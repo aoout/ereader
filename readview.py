@@ -23,18 +23,21 @@ class ReadView(WebView):
         Initialize EpubWindow
         """
         super().__init__(parent)
-        settings = QWebEngineSettings.globalSettings()
-        settings.setFontFamily(QWebEngineSettings.StandardFont, "LXGW WenKai")
-        settings.setFontSize(QWebEngineSettings.DefaultFontSize, 24)
+        self._setFont()
         self.epubParser = None
 
         self.bindShortcutKeys()
         self.scrollHeight = None
         self.page().scrollPositionChanged.connect(self.onScrollPositionChanged)
 
-    def onScrollPositionChanged(self, x):
-        def setScrollHeight(d):
-            self.scrollHeight = d
+    def _setFont(self):
+        settings = QWebEngineSettings.globalSettings()
+        settings.setFontFamily(QWebEngineSettings.StandardFont, "LXGW WenKai")
+        settings.setFontSize(QWebEngineSettings.DefaultFontSize, 24)
+
+    def onScrollPositionChanged(self, x) -> None:
+        def setScrollHeight(height:int) -> None:
+            self.scrollHeight = height
 
         self.page().runJavaScript("window.scrollY", setScrollHeight)
 
@@ -55,6 +58,9 @@ class ReadView(WebView):
         shortcut("left", self.loadPrePage)
         shortcut("right", self.loadNextPage)
 
+        shortcut("home", self.scrollToTop)
+        shortcut("end", self.scrollToButton)
+
         shortcut("O", self.oepnEpub)
 
         up = lambda: self.runINL(lambda: self.page().runJavaScript("window.scrollBy(0, -window.innerHeight/20);"))
@@ -65,9 +71,6 @@ class ReadView(WebView):
         shortcut("up", up)
         shortcut("down", down)
 
-        shortcut("home", lambda: self.runINL(lambda: self.page().runJavaScript("window.scrollTo(0, 0);")))
-        shortcut("end", lambda: self.runINL(
-            lambda: self.page().runJavaScript("window.scrollTo(0, document.body.scrollHeight);")))
         shortcut(Qt.Key_PageUp,
                  lambda: self.runINL(lambda: self.page().runJavaScript("window.scrollBy(0, -window.innerHeight);")))
         shortcut(Qt.Key_PageDown,
@@ -93,10 +96,10 @@ class ReadView(WebView):
         """
         Open EPUB file
         """
-        filename, _ = QFileDialog.getOpenFileName(self, 'Open EPUB', '', 'EPUB files (*.epub)')
-        if filename:
-            logging.info(f"Opening EPUB file: {filename}")
-            self.loadEpub(filename)
+        epubPath, _ = QFileDialog.getOpenFileName(self, 'Open EPUB', '', 'EPUB files (*.epub)')
+        if epubPath:
+            logging.info(f"Opening EPUB file: {epubPath}")
+            self.loadEpub(epubPath)
 
     def loadEpub(self, filename: str) -> None:
         """
