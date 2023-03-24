@@ -39,7 +39,6 @@ class EpubParser:
         manifest = opf_dict['package']['manifest']
         pages = [self.tempdir / item['@href'] for item in manifest['item'] if
                            item['@media-type'] == 'application/xhtml+xml']
-        pages.sort()
         css = [self.tempdir /item['@href'] for item in manifest['item'] if item['@media-type'] == 'text/css']
         return pages,css
 
