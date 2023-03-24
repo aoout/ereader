@@ -130,6 +130,7 @@ class ReadView(WebView):
                 self.scrollToButton(func=self.runALF)
             else:
                 self.loadNextPage()
+                self.scrollToTop(func=self.runALF)
 
     def loadNextPage(self) -> None:
         self.loadPage(self.epubParser.current_page_index + 1)
