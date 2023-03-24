@@ -29,7 +29,7 @@ class EpubParser:
         with zipfile.ZipFile(self.filename, 'r') as zip_ref:
             zip_ref.extractall(self.tempdir)
 
-    def parse(self) -> Tuple[List[str],List[str]]:
+    def parse(self) -> Tuple[List[Path],List[Path]]:
 
 
         with open(self.opf_file, 'r', encoding='utf-8') as f:
@@ -43,11 +43,7 @@ class EpubParser:
         css = [self.tempdir /item['@href'] for item in manifest['item'] if item['@media-type'] == 'text/css']
         return pages,css
 
-    def get_page_content(self, index: int) -> str:
-        """
-        Get page content by index
-        """
-        with open(self.pages_path[index], 'r', encoding='utf-8') as f:
-            page_content = f.read()
-        return page_content
+    def current_page_path(self) -> Path:
+        return self.pages_path[self.current_page_index]
+
 

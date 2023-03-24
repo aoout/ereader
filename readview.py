@@ -1,5 +1,6 @@
 import logging
 import os.path
+from pathlib import Path
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -51,14 +52,15 @@ class ReadView(WebView):
 
         shortcut("Q",lambda :QApplication.quit())
 
-    def setHtml(self, html: str, baseUrl: QtCore.QUrl = QtCore.QUrl("")) -> None:
+    def setHtmlFromFile(self, file: Path, baseUrl: QtCore.QUrl = QtCore.QUrl("")) -> None:
 
+        with open(file,"r") as f:
+            html = f.read()
         css_path = self.epub_parser.css_path + ["ereader.css"]
         for css in css_path:
             with open(css,"r") as f:
                 html = add_css_to_html(f.read(),html)
-        super().setHtml(html,baseUrl=QtCore.QUrl.fromLocalFile (str(self.epub_parser.tempdir) + os.path.sep ))
-        print(str(self.epub_parser.tempdir))
+        self.setHtml(html,baseUrl=QtCore.QUrl.fromLocalFile (str(file.parent) + os.path.sep ))
 
 
     def open_epub(self) -> None:
@@ -75,7 +77,7 @@ class ReadView(WebView):
         Load EPUB file
         """
         self.epub_parser = EpubParser(filename)
-        self.setHtml(self.epub_parser.get_page_content(0))
+        self.setHtmlFromFile(self.epub_parser.current_page_path())
         logging.info(f"Loaded HTML file: {self.epub_parser.pages_path[0]}")
 
     def wheelEvent(self, e: QtGui.QWheelEvent) -> None:
@@ -93,9 +95,9 @@ class ReadView(WebView):
         """
         if self.epub_parser.current_page_index != len(self.epub_parser.pages_path)-1:
             self.epub_parser.current_page_index += 1
-            self.setHtml(self.epub_parser.get_page_content(self.epub_parser.current_page_index))
+            self.setHtmlFromFile(self.epub_parser.current_page_path())
 
-            logging.info(f"Loaded HTML file: {self.epub_parser.pages_path[self.epub_parser.current_page_index]}")
+            logging.info(f"Loaded HTML file: {self.epub_parser.current_page_path()}")
         else:
             logging.info("No more HTML files to load")
 
@@ -106,9 +108,9 @@ class ReadView(WebView):
 
         if self.epub_parser.current_page_index != 0:
             self.epub_parser.current_page_index -= 1
-            self.setHtml(self.epub_parser.get_page_content(self.epub_parser.current_page_index))
+            self.setHtmlFromFile(self.epub_parser.current_page_path())
 
-            logging.info(f"Loaded HTML file: {self.epub_parser.pages_path[self.epub_parser.current_page_index]}")
+            logging.info(f"Loaded HTML file: {self.epub_parser.current_page_path()}")
             if scroll:
                 self.runALF(lambda :self.page().runJavaScript("window.scrollTo(0, document.body.scrollHeight);"))
         else:

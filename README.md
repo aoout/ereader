@@ -11,6 +11,6 @@ python main.py "D://book.epub"(optional)
 - [x] shortcut keys
 - [ ] more shortcut keys
 - [x] picture support
-- [ ] inline link support
+- [x] inline link support
 - [ ] bookmark support
 
