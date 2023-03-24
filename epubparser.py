@@ -42,7 +42,7 @@ class EpubParser:
         css = [self.tempdir /item['@href'] for item in manifest['item'] if item['@media-type'] == 'text/css']
         return pages,css
 
-    def current_page_path(self) -> Path:
+    def currentPagePath(self) -> Path:
         return self.pages_path[self.current_page_index]
 
 

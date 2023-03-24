@@ -9,36 +9,32 @@ logging.basicConfig(level=logging.INFO)
 
 
 class EReader(FramelessWindow):
-    """
-    A class representing an EReader object.
-    """
+
     def __init__(self) -> None:
-        """
-        Initialize EReader
-        """
+
         super().__init__()
         self.setTitleBar(StandardTitleBar(self))
 
         self.setWindowTitle('EReader')
-        self.resize_window()
-        self.set_layout()
-        self.set_qss()
+        self._resizeWindow()
+        self._setLayout()
+        self._setQss()
 
         self.show()
 
-    def resize_window(self) -> None:
+    def _resizeWindow(self) -> None:
         self.resize(1080, 784)
         desktop = QApplication.desktop().availableGeometry()
         w, h = desktop.width(), desktop.height()
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
 
-    def set_layout(self) -> None:
+    def _setLayout(self) -> None:
         self.hBoxLayout = QHBoxLayout(self)
         self.epub_window = ReadView(self)
         self.hBoxLayout.setContentsMargins(0, 40, 0, 0)
         self.hBoxLayout.addWidget(self.epub_window)
         self.setLayout(self.hBoxLayout)
 
-    def set_qss(self) -> None:
+    def _setQss(self) -> None:
         with open("ereader.qss","r") as f:
             self.setStyleSheet(f.read())

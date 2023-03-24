@@ -16,8 +16,8 @@ class WebView(QWebEngineView):
         """
         super().__init__(parent)
         self._loadFinishedQueue = Queue()
-        self.loadFinished.connect(self._on_loadFinished)
-        self.loadStarted.connect(self._on_loadStarted)
+        self.loadFinished.connect(self._onLoadFinished)
+        self.loadStarted.connect(self._onLoadStarted)
         self.loading = False
 
     def runALF(self,func:Callable)->None:
@@ -33,10 +33,10 @@ class WebView(QWebEngineView):
         if not self.loading:
             func()
 
-    def _on_loadStarted(self) -> None:
+    def _onLoadStarted(self) -> None:
         self.loading = True
 
-    def _on_loadFinished(self)->None:
+    def _onLoadFinished(self)->None:
         """
         A function to be called when the web view has finished loading.
         """

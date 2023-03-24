@@ -1,7 +1,7 @@
 import logging
 import os.path
+from collections import namedtuple
 from pathlib import Path
-from collections import  namedtuple
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -10,11 +10,12 @@ from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 from PyQt5.QtWidgets import QWidget, QFileDialog, QShortcut, QApplication
 
 from epubparser import EpubParser
-from utils import add_css_to_html
-from webview import WebView
 from persistentdict import data
+from utils import addCssToHtml
+from webview import WebView
 
-readingProgress = namedtuple("readingProgress",["pageIndex","scrollHeight"])
+readingProgress = namedtuple("readingProgress", ["pageIndex", "scrollHeight"])
+
 
 class ReadView(WebView):
     def __init__(self, parent: QWidget = None) -> None:
@@ -25,37 +26,36 @@ class ReadView(WebView):
         settings = QWebEngineSettings.globalSettings()
         settings.setFontFamily(QWebEngineSettings.StandardFont, "LXGW WenKai")
         settings.setFontSize(QWebEngineSettings.DefaultFontSize, 24)
-        self.epub_parser = None
+        self.epubParser = None
 
         self.bindShortcutKeys()
-        self.scroll_x = None
-        self.page().scrollPositionChanged.connect(self.on_scroll_x)
+        self.scrollHeight = None
+        self.page().scrollPositionChanged.connect(self.onScrollPositionChanged)
 
-    def on_scroll_x(self,x):
+    def onScrollPositionChanged(self, x):
         def setScrollHeight(d):
-            print(d)
-            self.scroll_x = d
+            self.scrollHeight = d
+
         self.page().runJavaScript("window.scrollY", setScrollHeight)
 
-
     def currentReadProgress(self) -> readingProgress:
-        print(self.scroll_x)
-        return readingProgress(pageIndex=self.epub_parser.current_page_index,scrollHeight=self.scroll_x)
+        print(self.scrollHeight)
+        return readingProgress(pageIndex=self.epubParser.current_page_index, scrollHeight=self.scrollHeight)
 
-    def gotoReadProgress(self,rp:tuple) -> None:
+    def gotoReadProgress(self, rp: tuple) -> None:
         rp = readingProgress(*rp)
-        self.runINL(lambda :self.load_page(rp.pageIndex))
-        self.runALF (lambda :self.page().runJavaScript(f"window.scrollTo(0,{rp.scrollHeight});"))
+        self.runINL(lambda: self.loadPage(rp.pageIndex))
+        self.runALF(lambda: self.page().runJavaScript(f"window.scrollTo(0,{rp.scrollHeight});"))
 
     def bindShortcutKeys(self) -> None:
         shortcut = lambda key, func: QShortcut(QtGui.QKeySequence(key), self).activated.connect(func)
 
-        shortcut("A", self.load_pre_page)
-        shortcut("D", self.load_next_page)
-        shortcut("left", self.load_pre_page)
-        shortcut("right", self.load_next_page)
+        shortcut("A", self.loadPrePage)
+        shortcut("D", self.loadNextPage)
+        shortcut("left", self.loadPrePage)
+        shortcut("right", self.loadNextPage)
 
-        shortcut("O", self.open_epub)
+        shortcut("O", self.oepnEpub)
 
         up = lambda: self.runINL(lambda: self.page().runJavaScript("window.scrollBy(0, -window.innerHeight/20);"))
         down = lambda: self.runINL(lambda: self.page().runJavaScript("window.scrollBy(0, window.innerHeight/20);"))
@@ -75,37 +75,36 @@ class ReadView(WebView):
 
         shortcut("Q", lambda: QApplication.quit())
         for i in range(10):
-            shortcut(str(i), lambda i=i: self.runINL(lambda: self.load_page(i)))
-        shortcut("ctrl+home",lambda :self.runINL(lambda :self.load_page(0)))
-        shortcut("ctrl+end",lambda :self.runINL(lambda :self.load_page(len(self.epub_parser.pages_path)-1)))
-
+            shortcut(str(i), lambda i=i: self.runINL(lambda: self.loadPage(i)))
+        shortcut("ctrl+home", lambda: self.runINL(lambda: self.loadPage(0)))
+        shortcut("ctrl+end", lambda: self.runINL(lambda: self.loadPage(len(self.epubParser.pages_path) - 1)))
 
     def setHtmlFromFile(self, file: Path, baseUrl: QtCore.QUrl = QtCore.QUrl("")) -> None:
 
         with open(file, "r") as f:
             html = f.read()
-        css_path = self.epub_parser.css_path + ["ereader.css"]
+        css_path = self.epubParser.css_path + ["ereader.css"]
         for css in css_path:
             with open(css, "r") as f:
-                html = add_css_to_html(f.read(), html)
+                html = addCssToHtml(f.read(), html)
         self.setHtml(html, baseUrl=QtCore.QUrl.fromLocalFile(str(file.parent) + os.path.sep))
 
-    def open_epub(self) -> None:
+    def oepnEpub(self) -> None:
         """
         Open EPUB file
         """
         filename, _ = QFileDialog.getOpenFileName(self, 'Open EPUB', '', 'EPUB files (*.epub)')
         if filename:
             logging.info(f"Opening EPUB file: {filename}")
-            self.load_epub(filename)
+            self.loadEpub(filename)
 
-    def load_epub(self, filename: str) -> None:
+    def loadEpub(self, filename: str) -> None:
         """
         Load EPUB file
         """
-        self.epub_parser = EpubParser(filename)
-        self.setHtmlFromFile(self.epub_parser.current_page_path())
-        logging.info(f"Loaded HTML file: {self.epub_parser.pages_path[0]}")
+        self.epubParser = EpubParser(filename)
+        self.setHtmlFromFile(self.epubParser.currentPagePath())
+        logging.info(f"Loaded HTML file: {self.epubParser.pages_path[0]}")
         data["currentEpubPath"] = filename
         data.save()
 
@@ -113,41 +112,26 @@ class ReadView(WebView):
         if not self.loading:
             bias = e.angleDelta().y()
             if bias > 0:
-                self.load_pre_page(scroll=True)
+                self.loadPrePage()
+                self.scrollToButton()
             else:
-                self.load_next_page()
+                self.loadNextPage()
 
-    def load_next_page(self) -> None:
-        """
-        Load the next page
-        """
-        if self.epub_parser.current_page_index != len(self.epub_parser.pages_path) - 1:
-            self.epub_parser.current_page_index += 1
-            self.setHtmlFromFile(self.epub_parser.current_page_path())
+    def loadNextPage(self) -> None:
+        self.loadPage(self.epubParser.current_page_index + 1)
 
-            logging.info(f"Loaded HTML file: {self.epub_parser.current_page_path()}")
-        else:
-            logging.info("No more HTML files to load")
+    def loadPrePage(self) -> None:
+        self.loadPage(self.epubParser.current_page_index - 1)
 
-    def load_pre_page(self, scroll: bool = False) -> None:
-        """
-        Load the previous page
-        """
-
-        if self.epub_parser.current_page_index != 0:
-            self.epub_parser.current_page_index -= 1
-            self.setHtmlFromFile(self.epub_parser.current_page_path())
-
-            logging.info(f"Loaded HTML file: {self.epub_parser.current_page_path()}")
-            if scroll:
-                self.runALF(lambda: self.page().runJavaScript("window.scrollTo(0, document.body.scrollHeight);"))
-        else:
-            logging.info("No more HTML files to load")
-
-    def load_page(self, index: int) -> None:
-        if 0 <= index <= len(self.epub_parser.pages_path) - 1:
-            self.epub_parser.current_page_index = index
-            self.setHtmlFromFile(self.epub_parser.current_page_path())
-            logging.info(f"Loaded HTML file: {self.epub_parser.current_page_path()}")
+    def loadPage(self, index: int) -> None:
+        if 0 <= index <= len(self.epubParser.pages_path) - 1:
+            self.epubParser.current_page_index = index
+            self.setHtmlFromFile(self.epubParser.currentPagePath())
+            logging.info(f"Loaded HTML file: {self.epubParser.currentPagePath()}")
         else:
             logging.info("No that HTML files to load")
+
+    def scrollToTop(self) -> None:
+        self.runALF(lambda: self.page().runJavaScript("window.scrollTo(0, 0);"))
+    def scrollToButton(self) -> None:
+        self.runALF(lambda: self.page().runJavaScript("window.scrollTo(0, document.body.scrollHeight);"))

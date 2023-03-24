@@ -16,11 +16,11 @@ if __name__ == '__main__':
     ereader = EReader()
     if len(sys.argv) == 1:
         if epub:=data.get("currentEpubPath"):
-            ereader.epub_window.load_epub(epub)
+            ereader.epub_window.loadEpub(epub)
         else:
-            ereader.epub_window.open_epub()
+            ereader.epub_window.oepnEpub()
     if len(sys.argv) == 2:
-        ereader.epub_window.load_epub(sys.argv[1])
+        ereader.epub_window.loadEpub(sys.argv[1])
     if rp:=data.get("currentReadProgress"):
         ereader.epub_window.gotoReadProgress(rp)
 
