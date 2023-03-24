@@ -59,10 +59,8 @@ class ReadView(WebView):
 
         def shiftUp() -> None:
             self.loadPrePage()
-            self.scrollToTop()
         def shiftDown() -> None:
             self.loadNextPage()
-            self.scrollToTop()
 
         shortcut("A", shiftUp)
         shortcut("D", shiftDown)
@@ -126,23 +124,25 @@ class ReadView(WebView):
         if not self.loading:
             bias = e.angleDelta().y()
             if bias > 0:
-                self.loadPrePage()
-                self.scrollToButton(func=self.runALF)
+                self.loadPrePage(scroll=self.scrollToButton)
             else:
                 self.loadNextPage()
-                self.scrollToTop(func=self.runALF)
 
-    def loadNextPage(self) -> None:
-        self.loadPage(self.epubParser.current_page_index + 1)
+    def loadNextPage(self,scroll:Callable = None) -> None:
+        self.loadPage(self.epubParser.current_page_index + 1,scroll)
 
-    def loadPrePage(self) -> None:
-        self.loadPage(self.epubParser.current_page_index - 1)
+    def loadPrePage(self,scroll:Callable = None) -> None:
+        self.loadPage(self.epubParser.current_page_index - 1,scroll)
 
-    def loadPage(self, index: int) -> None:
+    def loadPage(self, index: int,scroll:Callable = None) -> None:
+        if not scroll:
+            scroll = self.scrollToTop
+
         if 0 <= index <= len(self.epubParser.pages_path) - 1:
             self.epubParser.current_page_index = index
             self.setHtmlFromFile(self.epubParser.currentPagePath())
             logging.info(f"Loaded HTML file: {self.epubParser.currentPagePath()}")
+            self.runALF(scroll)
         else:
             logging.info("No that HTML files to load")
 
