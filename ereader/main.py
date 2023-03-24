@@ -1,12 +1,11 @@
 import logging
-import sys
-import os
+from typing import Optional
+
 import fire
 from PyQt5.QtWidgets import QApplication
 
 from .ereader import EReader
 from .persistentdict import data
-from typing import Optional
 
 logging.basicConfig(level=logging.INFO)
 

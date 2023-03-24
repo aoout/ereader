@@ -1,5 +1,4 @@
 from bs4 import BeautifulSoup
-from typing import Callable
 
 def addCssToHtml(css, html) -> str:
     soup = BeautifulSoup(html, 'html.parser')
