@@ -1,4 +1,5 @@
 import logging
+import os.path
 
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -56,7 +57,8 @@ class ReadView(WebView):
         for css in css_path:
             with open(css,"r") as f:
                 html = add_css_to_html(f.read(),html)
-        super().setHtml(html,baseUrl)
+        super().setHtml(html,baseUrl=QtCore.QUrl.fromLocalFile (str(self.epub_parser.tempdir) + os.path.sep ))
+        print(str(self.epub_parser.tempdir))
 
 
     def open_epub(self) -> None:

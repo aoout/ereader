@@ -10,7 +10,7 @@ python main.py "D://book.epub"(optional)
 
 - [x] shortcut keys
 - [ ] more shortcut keys
-- [ ] picture support
+- [x] picture support
 - [ ] inline link support
 - [ ] bookmark support
 
