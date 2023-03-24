@@ -28,15 +28,24 @@ class ReadView(WebView):
         self.epub_parser = None
 
         self.bindShortcutKeys()
+        self.scroll_x = None
+        self.page().scrollPositionChanged.connect(self.on_scroll_x)
+
+    def on_scroll_x(self,x):
+        def setScrollHeight(d):
+            print(d)
+            self.scroll_x = d
+        self.page().runJavaScript("window.scrollY", setScrollHeight)
 
 
     def currentReadProgress(self) -> readingProgress:
-        return readingProgress(pageIndex=self.epub_parser.current_page_index,scrollHeight=self.page().scrollPosition().y())
+        print(self.scroll_x)
+        return readingProgress(pageIndex=self.epub_parser.current_page_index,scrollHeight=self.scroll_x)
 
     def gotoReadProgress(self,rp:tuple) -> None:
         rp = readingProgress(*rp)
-        self.runINL(lambda :self.load_page(rp.pageIndex))\
-    #     scroll
+        self.runINL(lambda :self.load_page(rp.pageIndex))
+        self.runALF (lambda :self.page().runJavaScript(f"window.scrollTo(0,{rp.scrollHeight});"))
 
     def bindShortcutKeys(self) -> None:
         shortcut = lambda key, func: QShortcut(QtGui.QKeySequence(key), self).activated.connect(func)
