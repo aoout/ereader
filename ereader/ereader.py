@@ -4,6 +4,9 @@ from PyQt5.QtWidgets import QApplication, QHBoxLayout
 from qframelesswindow import FramelessWindow, StandardTitleBar
 
 from .readview import ReadView
+from .tocview import TocView
+from PyQt5 import QtCore
+from PyQt5 import QtGui
 
 logging.basicConfig(level=logging.INFO)
 
@@ -21,6 +24,8 @@ class EReader(FramelessWindow):
         self._setLayout()
         self._setQss()
 
+        self.setMouseTracking(True)
+
         self.show()
 
     def _resizeWindow(self) -> None:
@@ -32,9 +37,11 @@ class EReader(FramelessWindow):
 
     def _setLayout(self) -> None:
         self.hBoxLayout = QHBoxLayout(self)
-        self.epub_window = ReadView(self,self.settings)
+        self.tocView = TocView(self)
+        self.readView = ReadView(self,self.settings)
         self.hBoxLayout.setContentsMargins(10, 40, 10, 0)
-        self.hBoxLayout.addWidget(self.epub_window)
+        self.hBoxLayout.addWidget(self.tocView)
+        self.hBoxLayout.addWidget(self.readView)
         self.setLayout(self.hBoxLayout)
 
     def _setQss(self) -> None:
@@ -42,13 +49,26 @@ class EReader(FramelessWindow):
             self.setStyleSheet(f.read())
 
     def openEpub(self) -> None:
-        self.epub_window.openEpub()
+        self.readView.openEpub()
 
     def loadEpub(self,epubPath:str) -> None:
-        self.epub_window.loadEpub(epubPath)
+        self.readView.loadEpub(epubPath)
+        
 
     def currentReadProgress(self) -> dict:
-        return self.epub_window.currentReadProgress()
+        return self.readView.currentReadProgress()
 
     def gotoReadProgress(self, readProgress:dict) -> None:
-        self.epub_window.gotoReadProgress(readProgress)
+        self.readView.gotoReadProgress(readProgress)
+
+    def mouseMoveEvent(self, e: QtGui.QMouseEvent) -> None:
+
+        if e.pos().x() < 8:
+            self.tocView.show()
+        elif e.pos().x() > self.tocView.pos().x() + self.tocView.size().width(): 
+            self.tocView.hide()
+        return super().mouseMoveEvent(e)
+    
+    def leaveEvent(self, e: QtCore.QEvent) -> None:
+        self.tocView.hide()
+        return super().leaveEvent(e)

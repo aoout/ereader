@@ -115,6 +115,8 @@ class ReadView(WebView):
         data["currentEpubPath"] = epubPath
         data.save()
 
+        self.parent().tocView.load(self.epubParser.toc)
+
     def wheelEvent(self, e: QtGui.QWheelEvent) -> None:
         if not self.loading:
             bias = e.angleDelta().y()
@@ -142,7 +144,12 @@ class ReadView(WebView):
         if not func:
             func = self.runINL
         func (lambda: self.page().runJavaScript("window.scrollTo(0, 0);"))
+
     def scrollToButton(self,func:Callable = None) -> None:
         if not func:
             func = self.runINL
         func (lambda: self.page().runJavaScript("window.scrollTo(0, document.body.scrollHeight);"))
+
+    def mouseMoveEvent(self, e: QtGui.QMouseEvent) -> None:
+        self.parent().mouseMoveEvent(e)
+        return super().mouseMoveEvent(e)
