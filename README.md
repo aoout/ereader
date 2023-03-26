@@ -29,5 +29,5 @@ ereader --epubPath="D:\14777\Books\宇航服防尘指南.epub" --fontFamily=LXGW
 
 # Screenshot
 
-![](assets\screenshot001.png)
+![](assets/screenshot001.png)
 
