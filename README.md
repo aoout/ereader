@@ -19,5 +19,6 @@ ereader --epubPath="D:\14777\Books\宇航服防尘指南.epub" --fontSize=28
 
 # Bug
 
-- [ ] resume progress on short pages
+- [x] resume progress on short pages
+- [ ] contextmenu break tocwidget mechanism
 
