@@ -68,7 +68,3 @@ class EReader(FramelessWindow):
         elif e.pos().x() > self.tocView.pos().x() + self.tocView.size().width(): 
             self.tocView.hide()
         return super().mouseMoveEvent(e)
-    
-    def leaveEvent(self, e: QtCore.QEvent) -> None:
-        self.tocView.hide()
-        return super().leaveEvent(e)

@@ -4,9 +4,11 @@ class TocView(QTreeWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setFixedWidth(200)
+        self.setHeaderHidden(True)
         self.hide()
         self.setMouseTracking(True)
         self.itemClicked.connect(self.onItemClicked)
+
 
     def load(self, toc:dict) -> None:
         self.clear()
