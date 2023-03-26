@@ -27,7 +27,7 @@ class ReadView(WebView):
         self.epubParser = None
 
         self.bindShortcutKeys()
-        self.scrollHeight = None
+        self.scrollHeight = 0
         self.page().scrollPositionChanged.connect(self.onScrollPositionChanged)
 
 
@@ -38,14 +38,14 @@ class ReadView(WebView):
         fontSize = self.settings.get("fontSize",24)
         settings.setFontSize(QWebEngineSettings.DefaultFontSize, fontSize)
 
-    def onScrollPositionChanged(self, x) -> None:
+    def onScrollPositionChanged(self, _) -> None:
         def setScrollHeight(height:int) -> None:
             self.scrollHeight = height
 
         self.page().runJavaScript("window.scrollY", setScrollHeight)
 
     def currentReadProgress(self) -> dict:
-        return {"pageIndex":self.epubParser.current_page_index, "scrollHeight":self.scrollHeight}
+        return {"pageIndex":self.epubParser.currentPageIndex, "scrollHeight":self.scrollHeight}
 
     def gotoReadProgress(self, readProgress: dict) -> None:
         self.runINL(lambda: self.loadPage(readProgress["pageIndex"]))
@@ -86,7 +86,7 @@ class ReadView(WebView):
         for i in range(10):
             shortcut(str(i), lambda i=i: self.runINL(lambda: self.loadPage(i)))
         shortcut("ctrl+home", lambda: self.runINL(lambda: self.loadPage(0)))
-        shortcut("ctrl+end", lambda: self.runINL(lambda: self.loadPage(len(self.epubParser.pages_path) - 1)))
+        shortcut("ctrl+end", lambda: self.runINL(lambda: self.loadPage(len(self.epubParser.pagesPath) - 1)))
 
     def setHtmlFromFile(self, file: Path, baseUrl: QtCore.QUrl = QtCore.QUrl("")) -> None:
 
@@ -126,17 +126,17 @@ class ReadView(WebView):
                 self.loadNextPage()
 
     def loadNextPage(self,scroll:Callable = None) -> None:
-        self.loadPage(self.epubParser.current_page_index + 1,scroll)
+        self.loadPage(self.epubParser.currentPageIndex + 1,scroll)
 
     def loadPrePage(self,scroll:Callable = None) -> None:
-        self.loadPage(self.epubParser.current_page_index - 1,scroll)
+        self.loadPage(self.epubParser.currentPageIndex - 1,scroll)
 
     def loadPage(self, index: int,scroll:Callable = None) -> None:
         if not scroll:
             scroll = self.scrollToTop
 
-        if 0 <= index <= len(self.epubParser.pages_path) - 1:
-            self.epubParser.current_page_index = index
+        if 0 <= index <= len(self.epubParser.pagesPath) - 1:
+            self.epubParser.currentPageIndex = index
             self.setHtmlFromFile(self.epubParser.currentPagePath())
             self.runALF(scroll)
 
