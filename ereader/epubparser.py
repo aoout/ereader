@@ -14,64 +14,63 @@ class EpubParser:
         """
         self.filename = filename
         self.tempdir = Path(tempfile.TemporaryDirectory().name)
-        self.current_page_index = 0
+        self.currentPageIndex = 0
         self.extract()
-        self.opf_file = next(Path(self.tempdir).rglob('content.opf'), None)
-        self.tempdir = self.opf_file.parent
+        self.opfFile = next(Path(self.tempdir).rglob('content.opf'), None)
+        self.tempdir = self.opfFile.parent
 
-        self.pages_path ,self.css_path = self.parse()
-        self.toc = self.parse_toc()
+        self.pagesPath ,self.css_path = self.parse()
+        self.toc = self.parseToc()
 
     def extract(self):
         if self.tempdir.exists():
             shutil.rmtree(self.tempdir)
         os.makedirs(self.tempdir)
-        with zipfile.ZipFile(self.filename, 'r') as zip_ref:
-            zip_ref.extractall(self.tempdir)
+        with zipfile.ZipFile(self.filename, 'r') as zipRef:
+            zipRef.extractall(self.tempdir)
 
     def parse(self) -> Tuple[List[Path],List[Path]]:
-        with open(self.opf_file, 'r', encoding='utf-8') as f:
-            opf_content = f.read()
+        with open(self.opfFile, 'r', encoding='utf-8') as f:
+            opfContent = f.read()
 
-        opf_dict = xmltodict.parse(opf_content)
-        manifest = opf_dict['package']['manifest']
+        opfDict = xmltodict.parse(opfContent)
+        manifest = opfDict['package']['manifest']
         pages = [self.tempdir / item['@href'] for item in manifest['item'] if
                            item['@media-type'] == 'application/xhtml+xml']
         css = [self.tempdir /item['@href'] for item in manifest['item'] if item['@media-type'] == 'text/css']
         return pages,css
 
-    def parse_toc(self):
-        toc_file = next(Path(self.tempdir).rglob('toc.ncx'), None)
-        print(toc_file)
-        with open(toc_file, 'r', encoding='utf-8') as f:
-            toc_content = f.read()
+    def parseToc(self):
+        tocFile = next(Path(self.tempdir).rglob('toc.ncx'), None)
+        with open(tocFile, 'r', encoding='utf-8') as f:
+            tocContent = f.read()
 
-        toc_dict = xmltodict.parse(toc_content)
-        nav_map = toc_dict['ncx']['navMap']
+        tocDict = xmltodict.parse(tocContent)
+        navMap = tocDict['ncx']['navMap']
         toc = []
-        for item in nav_map['navPoint']:
-            toc_item = {'text': item['navLabel']['text'], 'url': self.tempdir / item['content']['@src']}
+        for item in navMap['navPoint']:
+            tocItem = {'text': item['navLabel']['text'], 'url': self.tempdir / item['content']['@src']}
             if 'navPoint' in item:
-                toc_item['subitems'] = []
+                tocItem['subitems'] = []
                 for subitem in item['navPoint']:
                     subitem = {'text': subitem['navLabel']['text'], 'url': self.tempdir / subitem['content']['@src']}
-                    toc_item['subitems'].append(subitem)
-            toc.append(toc_item)
+                    tocItem['subitems'].append(subitem)
+            toc.append(tocItem)
         return toc
 
-    def print_toc(self):
-        def print_toc_item(item, level=0):
+    def printToc(self):
+        def printTocItem(item, level=0):
             print('  ' * level + item['text'])
             if 'subitems' in item:
                 for subitem in item['subitems']:
-                    print_toc_item(subitem, level + 1)
+                    printTocItem(subitem, level + 1)
 
         for item in self.toc:
-            print_toc_item(item)
+            printTocItem(item)
 
 
 
     def currentPagePath(self) -> Path:
-        return self.pages_path[self.current_page_index]
+        return self.pagesPath[self.currentPageIndex]
 
 
