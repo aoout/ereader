@@ -31,7 +31,7 @@ class ReadView(WebView):
         self.page().scrollPositionChanged.connect(self.onScrollPositionChanged)
 
 
-    def _setFont(self):
+    def _setFont(self) -> None:
         settings = QWebEngineSettings.globalSettings()
         fontFamily = self.settings.get("fontFamily","LXGW WenKai")
         settings.setFontFamily(QWebEngineSettings.StandardFont, fontFamily)

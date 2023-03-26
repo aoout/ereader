@@ -10,12 +10,12 @@ from PyQt5.QtGui import QMouseEvent
 class WebView(QWebEngineView):
     """
     A class representing a web view.
+    The loading attribute is provided to indicate the loading status.
+    Provides runALF and runINL functions to better handle the relationship between functions and loading.
+    Make event handlers about mouse work.
     """
 
     def __init__(self,parent:QWidget = None) -> None:
-        """
-        Initializes a new instance of the WebView class.
-        """
         super().__init__(parent)
         self._loadFinishedQueue = Queue()
         self.loadFinished.connect(self._onLoadFinished)
@@ -25,13 +25,13 @@ class WebView(QWebEngineView):
         self._childWidget = None
         self.installEventFilter(self)
 
-    def runALF(self,func:Callable)->None:
+    def runALF(self,func:Callable) -> None:
         """
         runs a function After the web view's Loading Finished .
         """
         self._loadFinishedQueue.put(func)
 
-    def runINL(self,func:Callable)->None:
+    def runINL(self,func:Callable) -> None:
         """
         runs a function if the web view Is Not Loading.
         """
@@ -41,12 +41,12 @@ class WebView(QWebEngineView):
     def _onLoadStarted(self) -> None:
         self.loading = True
 
-    def _onLoadFinished(self)->None:
+    def _onLoadFinished(self) -> None:
         self.loading = False
         while not self._loadFinishedQueue.empty():
             self._loadFinishedQueue.get()()
 
-    def eventFilter(self, source, event):
+    def eventFilter(self, source, event) -> None:
         """
         Make event handlers about mouse work.
         """

@@ -8,26 +8,26 @@ from typing import List, Tuple
 import xmltodict
 
 class EpubParser:
-    def __init__(self, filename: str) -> None:
+    def __init__(self, epubPath: str) -> None:
         """
         Initialize EpubParser
         """
-        self.filename = filename
-        self.tempdir = Path(tempfile.TemporaryDirectory().name)
+        self.filename = epubPath
+        self.tempDir = Path(tempfile.TemporaryDirectory().name)
         self.currentPageIndex = 0
         self.extract()
-        self.opfFile = next(Path(self.tempdir).rglob('content.opf'), None)
-        self.tempdir = self.opfFile.parent
+        self.opfFile = next(Path(self.tempDir).rglob('content.opf'), None)
+        self.tempDir = self.opfFile.parent
 
         self.pagesPath ,self.css_path = self.parse()
         self.toc = self.parseToc()
 
-    def extract(self):
-        if self.tempdir.exists():
-            shutil.rmtree(self.tempdir)
-        os.makedirs(self.tempdir)
+    def extract(self) -> None:
+        if self.tempDir.exists():
+            shutil.rmtree(self.tempDir)
+        os.makedirs(self.tempDir)
         with zipfile.ZipFile(self.filename, 'r') as zipRef:
-            zipRef.extractall(self.tempdir)
+            zipRef.extractall(self.tempDir)
 
     def parse(self) -> Tuple[List[Path],List[Path]]:
         with open(self.opfFile, 'r', encoding='utf-8') as f:
@@ -35,13 +35,13 @@ class EpubParser:
 
         opfDict = xmltodict.parse(opfContent)
         manifest = opfDict['package']['manifest']
-        pages = [self.tempdir / item['@href'] for item in manifest['item'] if
+        pages = [self.tempDir / item['@href'] for item in manifest['item'] if
                            item['@media-type'] == 'application/xhtml+xml']
-        css = [self.tempdir /item['@href'] for item in manifest['item'] if item['@media-type'] == 'text/css']
+        css = [self.tempDir /item['@href'] for item in manifest['item'] if item['@media-type'] == 'text/css']
         return pages,css
 
-    def parseToc(self):
-        tocFile = next(Path(self.tempdir).rglob('toc.ncx'), None)
+    def parseToc(self) -> dict:
+        tocFile = next(Path(self.tempDir).rglob('toc.ncx'), None)
         with open(tocFile, 'r', encoding='utf-8') as f:
             tocContent = f.read()
 
@@ -49,16 +49,16 @@ class EpubParser:
         navMap = tocDict['ncx']['navMap']
         toc = []
         for item in navMap['navPoint']:
-            tocItem = {'text': item['navLabel']['text'], 'url': self.tempdir / item['content']['@src']}
+            tocItem = {'text': item['navLabel']['text'], 'url': self.tempDir / item['content']['@src']}
             if 'navPoint' in item:
                 tocItem['subitems'] = []
                 for subitem in item['navPoint']:
-                    subitem = {'text': subitem['navLabel']['text'], 'url': self.tempdir / subitem['content']['@src']}
+                    subitem = {'text': subitem['navLabel']['text'], 'url': self.tempDir / subitem['content']['@src']}
                     tocItem['subitems'].append(subitem)
             toc.append(tocItem)
         return toc
 
-    def printToc(self):
+    def printToc(self) -> None:
         def printTocItem(item, level=0):
             print('  ' * level + item['text'])
             if 'subitems' in item:
