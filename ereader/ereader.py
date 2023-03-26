@@ -1,6 +1,5 @@
 import logging
-import importlib.resources as resources
-
+import os
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QApplication, QHBoxLayout
 from qframelesswindow import FramelessWindow, StandardTitleBar
@@ -45,7 +44,8 @@ class EReader(FramelessWindow):
         self.setLayout(self.hBoxLayout)
 
     def _setQss(self) -> None:
-        with resources.open_text("ereader", "ereader.qss") as f:
+        qss_path = os.path.join(os.path.dirname(__file__), 'ereader.qss')
+        with open(qss_path, 'r') as f:
             self.setStyleSheet(f.read())
 
     def openEpub(self) -> None:

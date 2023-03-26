@@ -94,8 +94,9 @@ class ReadView(WebView):
         for css in self.epubParser.css_path:
             with open(css, "r") as f:
                 html = addCssToHtml(f.read(), html)
-        with res.open_text("ereader", "ereader.css") as f:
-            html = addCssToHtml(f.read(),html)
+        css = os.path.join(os.path.dirname(__file__), 'ereader.css')
+        with open(css, "r") as f:
+            self.setStyleSheet(f.read())
         self.setHtml(html, baseUrl=QtCore.QUrl.fromLocalFile(str(file.parent) + os.path.sep))
 
     def openEpub(self) -> None:
