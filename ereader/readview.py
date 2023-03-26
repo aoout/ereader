@@ -3,17 +3,15 @@ import os.path
 from pathlib import Path
 from typing import Callable
 
-from PyQt5 import QtCore
-from PyQt5 import QtGui
+from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
-from PyQt5.QtWidgets import QWidget, QFileDialog, QShortcut, QApplication
+from PyQt5.QtWidgets import QApplication, QFileDialog, QShortcut, QWidget
 
 from .epubparser import EpubParser
 from .persistentdict import data
 from .utils import addCssToHtml
 from .webview import WebView
-
 
 
 class ReadView(WebView):
@@ -88,11 +86,11 @@ class ReadView(WebView):
         shortcut("ctrl+home", lambda: self.runINL(lambda: self.loadPage(0)))
         shortcut("ctrl+end", lambda: self.runINL(lambda: self.loadPage(len(self.epubParser.pagesPath) - 1)))
 
-    def setHtmlFromFile(self, file: Path, baseUrl: QtCore.QUrl = QtCore.QUrl("")) -> None:
+    def setHtmlFromFile(self, file: Path) -> None:
 
         with open(file, "r") as f:
             html = f.read()
-        css_path = self.epubParser.css_path + ["ereader/ereader.css"]
+        css_path = self.epubParser.css_path + [".ereader.css"]
         for css in css_path:
             with open(css, "r") as f:
                 html = addCssToHtml(f.read(), html)

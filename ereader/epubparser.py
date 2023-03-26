@@ -7,6 +7,7 @@ from typing import List, Tuple
 
 import xmltodict
 
+
 class EpubParser:
     def __init__(self, epubPath: str) -> None:
         """

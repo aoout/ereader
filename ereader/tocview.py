@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QTreeWidget,QTreeWidgetItem
+from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem
+
 
 class TocView(QTreeWidget):
     def __init__(self, parent=None) -> None:

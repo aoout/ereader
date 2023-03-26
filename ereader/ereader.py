@@ -1,12 +1,11 @@
 import logging
 
+from PyQt5 import QtGui
 from PyQt5.QtWidgets import QApplication, QHBoxLayout
 from qframelesswindow import FramelessWindow, StandardTitleBar
 
 from .readview import ReadView
 from .tocview import TocView
-from PyQt5 import QtCore
-from PyQt5 import QtGui
 
 logging.basicConfig(level=logging.INFO)
 
@@ -45,7 +44,7 @@ class EReader(FramelessWindow):
         self.setLayout(self.hBoxLayout)
 
     def _setQss(self) -> None:
-        with open("ereader/ereader.qss","r") as f:
+        with open(".ereader.qss","r") as f:
             self.setStyleSheet(f.read())
 
     def openEpub(self) -> None:

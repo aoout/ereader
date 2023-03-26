@@ -1,10 +1,10 @@
 from queue import Queue
 from typing import Callable
 
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import QEvent
 from PyQt5.QtGui import QMouseEvent
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWidgets import QWidget
 
 
 class WebView(QWebEngineView):
