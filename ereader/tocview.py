@@ -1,14 +1,14 @@
 from PyQt5.QtWidgets import QTreeWidget,QTreeWidgetItem
 
 class TocView(QTreeWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setFixedWidth(200)
         self.hide()
         self.setMouseTracking(True)
         self.itemClicked.connect(self.onItemClicked)
 
-    def load(self, toc):
+    def load(self, toc:dict) -> None:
         self.clear()
         for item in toc:
             widgetItem = QTreeWidgetItem(self)
@@ -21,9 +21,9 @@ class TocView(QTreeWidget):
                 widgetItem.addChild(subWidgetItem)
                 subWidgetItem.url = subitem["url"]
 
-    def onItemClicked(self, item,column):
-        pages_path = self.parent().readView.epubParser.pages_path
-        self.parent().readView.loadPage(pages_path.index(item.url))
+    def onItemClicked(self, item:QTreeWidgetItem, column) -> None:
+        pagesPath = self.parent().readView.epubParser.pagesPath
+        self.parent().readView.loadPage(pagesPath.index(item.url))
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event) -> None:
         self.parent().mouseMoveEvent(event)
