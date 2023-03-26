@@ -1,8 +1,13 @@
-# Usage
+# Install & Usage
+
 
 ```
 pip install git+https://github.com/aoout/ereader.git@master
-ereader --epubPath="D:\14777\Books\宇航服防尘指南.epub" --fontSize=28
+ereader --help
+```
+
+```
+ereader --epubPath="D:\14777\Books\宇航服防尘指南.epub" --fontFamily=LXGW WenKai --fontSize=28
 ```
 
 # RoadMap
@@ -21,4 +26,8 @@ ereader --epubPath="D:\14777\Books\宇航服防尘指南.epub" --fontSize=28
 
 - [x] resume progress on short pages
 - [ ] contextmenu break tocwidget mechanism
+
+# Screenshot
+
+![](assets\screenshot001.png)
 
