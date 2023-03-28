@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem
 
 
@@ -16,13 +18,13 @@ class TocView(QTreeWidget):
         for item in toc:
             widgetItem = QTreeWidgetItem(self)
             widgetItem.setText(0, item["text"])
-            widgetItem.url = item["url"]
+            widgetItem.url =  Path(str(item["url"]).split("#")[0])
             self.addTopLevelItem(widgetItem)
             for subitem in item.get("subitems",[]):
                 subWidgetItem = QTreeWidgetItem(self)
                 subWidgetItem.setText(0, subitem["text"])
                 widgetItem.addChild(subWidgetItem)
-                subWidgetItem.url = subitem["url"]
+                subWidgetItem.url = Path( str(subitem["url"]).split("#")[0])
 
     def onItemClicked(self, item:QTreeWidgetItem, column) -> None:
         pagesPath = self.parent().readView.epubParser.pagesPath

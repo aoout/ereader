@@ -49,14 +49,23 @@ class EpubParser:
         tocDict = xmltodict.parse(tocContent)
         navMap = tocDict['ncx']['navMap']
         toc = []
+
+        def parseNavPoint(navPoint):
+            tocItem = {'text': navPoint['navLabel']['text'], 'url': self.tempDir / navPoint['content']['@src']}
+            if 'navPoint' in navPoint:
+                if isinstance(navPoint['navPoint'], list):
+                    tocItem['subitems'] = []
+                    for subitem in navPoint['navPoint']:
+                        tocItem['subitems'].append(parseNavPoint(subitem))
+                else:
+                    tocItem['subitems'] = [parseNavPoint(navPoint['navPoint'])]
+            return tocItem
+
+            
+
         for item in navMap['navPoint']:
-            tocItem = {'text': item['navLabel']['text'], 'url': self.tempDir / item['content']['@src']}
-            if 'navPoint' in item:
-                tocItem['subitems'] = []
-                for subitem in item['navPoint']:
-                    subitem = {'text': subitem['navLabel']['text'], 'url': self.tempDir / subitem['content']['@src']}
-                    tocItem['subitems'].append(subitem)
-            toc.append(tocItem)
+            toc.append(parseNavPoint(item))
+
         return toc
 
     def printToc(self) -> None:
