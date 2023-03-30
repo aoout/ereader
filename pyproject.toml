@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ereader"
-version = "0.1.1"
+version = "0.1.2"
 description = "Try to develop an epub reader using pyqt."
 authors = ["aoout <wuz66280@gmail.com>"]
 readme = "README.md"
