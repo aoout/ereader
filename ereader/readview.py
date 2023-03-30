@@ -89,13 +89,13 @@ class ReadView(WebView):
 
     def setHtmlFromFile(self, file: Path) -> None:
 
-        with open(file, "r") as f:
+        with open(file, "r", encoding='utf-8') as f:
             html = f.read()
         for css in self.epubParser.css_path:
-            with open(css, "r") as f:
+            with open(css, "r", encoding='utf-8') as f:
                 html = addCssToHtml(f.read(), html)
         css = os.path.join(os.path.dirname(__file__), 'ereader.css')
-        with open(css, "r") as f:
+        with open(css, "r", encoding='utf-8') as f:
             self.setStyleSheet(f.read())
         self.setHtml(html, baseUrl=QtCore.QUrl.fromLocalFile(str(file.parent) + os.path.sep))
 

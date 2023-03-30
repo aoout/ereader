@@ -45,7 +45,7 @@ class EReader(FramelessWindow):
 
     def _setQss(self) -> None:
         qss_path = os.path.join(os.path.dirname(__file__), 'ereader.qss')
-        with open(qss_path, 'r') as f:
+        with open(qss_path, 'r',encoding='utf-8') as f:
             self.setStyleSheet(f.read())
 
     def openEpub(self) -> None:
