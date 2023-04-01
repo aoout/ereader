@@ -20,7 +20,7 @@ class EpubParser:
         self.opfFile = next(Path(self.tempDir).rglob('content.opf'), None)
         self.tempDir = self.opfFile.parent
 
-        self.pagesPath ,self.css_path = self.parse()
+        self.pagesPath, self.css_path = self.parse()
         self.toc = self.parseToc()
 
     def extract(self) -> None:
@@ -30,16 +30,17 @@ class EpubParser:
         with zipfile.ZipFile(self.filename, 'r') as zipRef:
             zipRef.extractall(self.tempDir)
 
-    def parse(self) -> Tuple[List[Path],List[Path]]:
+    def parse(self) -> Tuple[List[Path], List[Path]]:
         with open(self.opfFile, 'r', encoding='utf-8') as f:
             opfContent = f.read()
 
         opfDict = xmltodict.parse(opfContent)
         manifest = opfDict['package']['manifest']
         pages = [self.tempDir / item['@href'] for item in manifest['item'] if
-                           item['@media-type'] == 'application/xhtml+xml']
-        css = [self.tempDir /item['@href'] for item in manifest['item'] if item['@media-type'] == 'text/css']
-        return pages,css
+                 item['@media-type'] == 'application/xhtml+xml']
+        css = [self.tempDir / item['@href']
+               for item in manifest['item'] if item['@media-type'] == 'text/css']
+        return pages, css
 
     def parseToc(self) -> dict:
         tocFile = next(Path(self.tempDir).rglob('toc.ncx'), None)
@@ -51,7 +52,8 @@ class EpubParser:
         toc = []
 
         def parseNavPoint(navPoint):
-            tocItem = {'text': navPoint['navLabel']['text'], 'url': self.tempDir / navPoint['content']['@src']}
+            tocItem = {'text': navPoint['navLabel']['text'],
+                       'url': self.tempDir / navPoint['content']['@src']}
             if 'navPoint' in navPoint:
                 if isinstance(navPoint['navPoint'], list):
                     tocItem['subitems'] = []
@@ -60,8 +62,6 @@ class EpubParser:
                 else:
                     tocItem['subitems'] = [parseNavPoint(navPoint['navPoint'])]
             return tocItem
-
-            
 
         for item in navMap['navPoint']:
             toc.append(parseNavPoint(item))
@@ -78,9 +78,5 @@ class EpubParser:
         for item in self.toc:
             printTocItem(item)
 
-
-
     def currentPagePath(self) -> Path:
         return self.pagesPath[self.currentPageIndex]
-
-

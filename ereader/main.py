@@ -9,7 +9,8 @@ from .persistentdict import data
 
 logging.basicConfig(level=logging.INFO)
 
-def run(epubPath:Optional[str]=None, fontFamily:Optional[str]=None,fontSize:Optional[int]=None):
+
+def run(epubPath: Optional[str] = None, fontFamily: Optional[str] = None, fontSize: Optional[int] = None):
     app = QApplication([])
     settings = {}
     if fontFamily:
@@ -20,18 +21,19 @@ def run(epubPath:Optional[str]=None, fontFamily:Optional[str]=None,fontSize:Opti
     if epubPath:
         ereader.loadEpub(epubPath)
     else:
-        if epubPath:=data.get("currentEpubPath"):
+        if epubPath := data.get("currentEpubPath"):
             ereader.loadEpub(epubPath)
         else:
             ereader.openEpub()
-    
-    if readProgress:=data.get("currentReadProgress"):
+
+    if readProgress := data.get("currentReadProgress"):
         ereader.gotoReadProgress(readProgress)
 
     app.exec_()
     data["currentReadProgress"] = ereader.currentReadProgress()
     data.save()
     logging.shutdown()
+
 
 def main():
     fire.Fire(run)
