@@ -10,11 +10,15 @@ class TocView(QTreeWidget):
         self.setHeaderHidden(True)
         self.hide()
         self.setMouseTracking(True)
-        self.itemClicked.connect(self.onItemClicked)
 
+        self.setIndentation(0)
+        self.itemClicked.connect(self.onItemClicked)
 
     def load(self, toc:dict) -> None:
         self.clear()
+        
+
+
         for item in toc:
             widgetItem = QTreeWidgetItem(self)
             widgetItem.setText(0, item["text"])
@@ -23,7 +27,7 @@ class TocView(QTreeWidget):
             for subitem in item.get("subitems",[]):
                 subWidgetItem = QTreeWidgetItem(self)
                 subWidgetItem.setText(0, subitem["text"])
-                widgetItem.addChild(subWidgetItem)
+                # widgetItem.addChild(subWidgetItem)
                 subWidgetItem.url = Path( str(subitem["url"]).split("#")[0])
 
     def onItemClicked(self, item:QTreeWidgetItem, column) -> None:
