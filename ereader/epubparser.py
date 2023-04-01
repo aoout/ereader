@@ -53,7 +53,7 @@ class EpubParser:
 
         def parseNavPoint(navPoint):
             tocItem = {'text': navPoint['navLabel']['text'],
-                       'url': self.tempDir / navPoint['content']['@src']}
+                       'url': str(self.tempDir / navPoint['content']['@src'])}
             if 'navPoint' in navPoint:
                 if isinstance(navPoint['navPoint'], list):
                     tocItem['subitems'] = []

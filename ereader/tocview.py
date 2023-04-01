@@ -17,16 +17,19 @@ class TocView(QTreeWidget):
     def load(self, toc: dict) -> None:
         self.clear()
 
-        for item in toc:
-            widgetItem = QTreeWidgetItem(self)
+        def add_item(item, parent=None):
+            widgetItem = QTreeWidgetItem(parent)
             widgetItem.setText(0, item["text"])
-            widgetItem.url = Path(str(item["url"]).split("#")[0])
-            self.addTopLevelItem(widgetItem)
+            widgetItem.url = Path(item["url"].split("#")[0])
+            if parent is None:
+                self.addTopLevelItem(widgetItem)
+            else:
+                parent.addChild(widgetItem)
             for subitem in item.get("subitems", []):
-                subWidgetItem = QTreeWidgetItem(self)
-                subWidgetItem.setText(0, subitem["text"])
-                # widgetItem.addChild(subWidgetItem)
-                subWidgetItem.url = Path(str(subitem["url"]).split("#")[0])
+                add_item(subitem, widgetItem)
+
+        for item in toc:
+            add_item(item)
 
     def onItemClicked(self, item: QTreeWidgetItem, column) -> None:
         pagesPath = self.parent().readView.epubParser.pagesPath
