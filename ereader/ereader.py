@@ -8,8 +8,8 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QApplication, QHBoxLayout
 from qframelesswindow import FramelessWindow, StandardTitleBar
 
-from .readview import ReadWidget
-from .tocview import TocWidget
+from .readview import ReadView
+from .tocview import TocView
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 
 logging.basicConfig(level=logging.INFO)
@@ -91,8 +91,8 @@ class EReader(FramelessWindow):
 
     def _setLayout(self) -> None:
         self.hBoxLayout = QHBoxLayout(self)
-        self.tocView = TocWidget(self)
-        self.readView = ReadWidget(self, self.settings)
+        self.tocView = TocView(self)
+        self.readView = ReadView(self, self.settings)
         self.hBoxLayout.setContentsMargins(10, 40, 10, 0)
         self.hBoxLayout.addWidget(self.tocView)
         self.hBoxLayout.addWidget(self.readView)

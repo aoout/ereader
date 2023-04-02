@@ -1,6 +1,5 @@
 import os.path
 import re
-from pathlib import Path
 from typing import Callable
 
 from bs4 import BeautifulSoup
@@ -10,11 +9,11 @@ from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QFileDialog, QShortcut, QWidget
 from termcolor import colored
 
-from ..utils import EpubParser, addCssToHtml, data
+from ..utils import EpubParser, data
 from .webview import WebView
 
 
-class ReadView(WebView):
+class ReadWidget(WebView):
     def __init__(self, parent: QWidget = None, settings: dict = {}) -> None:
         """
         Initialize EpubWindow
@@ -125,20 +124,14 @@ class ReadView(WebView):
             for pagePath in self.epubParser.pagesPath:
                 self.searchPage(pagePath, query)
         else:
-            self.searchPage(self.epubParser.currentPagePath(),query)
+            self.searchPage(self.epubParser.currentPagePath(), query)
 
-    def setHtmlFromFile(self, file: Path) -> None:
+    def setHtml(self, html: str, baseUrl: QtCore.QUrl) -> None:
 
-        with open(file, "r", encoding='utf-8') as f:
-            html = f.read()
-        for css in self.epubParser.css_path:
-            with open(css, "r", encoding='utf-8') as f:
-                html = addCssToHtml(f.read(), html)
         css = os.path.join(os.path.dirname(__file__), 'ereader.css')
         with open(css, "r", encoding='utf-8') as f:
             self.setStyleSheet(f.read())
-        self.setHtml(html, baseUrl=QtCore.QUrl.fromLocalFile(
-            str(file.parent) + os.path.sep))
+        super().setHtml(html, baseUrl)
 
     def openEpub(self) -> None:
         """
@@ -154,7 +147,8 @@ class ReadView(WebView):
         Load EPUB file
         """
         self.epubParser = EpubParser(epubPath)
-        self.setHtmlFromFile(self.epubParser.currentPagePath())
+        self.setHtml(self.epubParser.currentPageHtml(), QtCore.QUrl.fromLocalFile(
+            str(self.epubParser.currentPagePath())))
         data["currentEpubPath"] = epubPath
         data.save()
 
@@ -180,7 +174,8 @@ class ReadView(WebView):
 
         if 0 <= index <= len(self.epubParser.pagesPath) - 1:
             self.epubParser.currentPageIndex = index
-            self.setHtmlFromFile(self.epubParser.currentPagePath())
+            self.setHtml(self.epubParser.currentPageHtml(), QtCore.QUrl.fromLocalFile(
+                (str(self.epubParser.currentPagePath()))))
             self.runALF(scroll)
 
     def scrollToTop(self, func: Callable = None) -> None:

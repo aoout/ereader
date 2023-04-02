@@ -3,7 +3,7 @@ from pathlib import Path
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem
 
 
-class TocView(QTreeWidget):
+class TocWidget(QTreeWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setFixedWidth(200)

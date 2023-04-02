@@ -7,6 +7,8 @@ from typing import List, Tuple
 
 import xmltodict
 
+from .functions import addCssToHtml
+
 
 class EpubParser:
     def __init__(self, epubPath: str) -> None:
@@ -42,11 +44,21 @@ class EpubParser:
         css = [self.tempDir / item['@href']
                for item in manifest['item'] if item['@media-type'] == 'text/css']
         return pages, css
-    
-    
+
     def currentPagePath(self) -> Path:
         return self.pagesPath[self.currentPageIndex]
 
+    def getPageHtml(self, pageIndex: int, withCss: bool = True) -> str:
+        with open(pageIndex, "r", encoding='utf-8') as f:
+            html = f.read()
+        if withCss:
+            for css in self.css_path:
+                with open(css, "r", encoding='utf-8') as f:
+                    html = addCssToHtml(f.read(), html)
+        return html
+
+    def currentPageHtml(self, withCss: bool = True) -> str:
+        return self.getPageHtml(self.currentPagePath(), withCss)
 
     def parseToc(self) -> list:
         tocFile = next(Path(self.tempDir).rglob('toc.ncx'), None)
@@ -91,13 +103,9 @@ class EpubParser:
             opfDict = xmltodict.parse(opfContent)
             metadata = opfDict['package']['metadata']
             meta = {}
-            for key,value in metadata.items():
+            for key, value in metadata.items():
                 if key.startswith("dc"):
                     meta[key] = value
             return meta
         except Exception as e:
             print(e)
-
-    
-
-
