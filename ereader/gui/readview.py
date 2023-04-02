@@ -10,9 +10,7 @@ from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QFileDialog, QShortcut, QWidget
 from termcolor import colored
 
-from .epubparser import EpubParser
-from .persistentdict import data
-from .utils import addCssToHtml
+from ..utils import EpubParser, addCssToHtml, data
 from .webview import WebView
 
 

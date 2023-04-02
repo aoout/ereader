@@ -5,8 +5,8 @@ from typing import Optional
 import fire
 from PyQt5.QtWidgets import QApplication
 
-from .ereader import EReader
-from .persistentdict import data
+from .gui import EReader
+from .utils import data
 
 logging.basicConfig(level=logging.INFO)
 
