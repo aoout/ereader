@@ -22,6 +22,7 @@ class EpubParser:
 
         self.pagesPath, self.css_path = self.parse()
         self.toc = self.parseToc()
+        self.meta = self.parseMeta()
 
     def extract(self) -> None:
         if self.tempDir.exists():
@@ -41,6 +42,11 @@ class EpubParser:
         css = [self.tempDir / item['@href']
                for item in manifest['item'] if item['@media-type'] == 'text/css']
         return pages, css
+    
+    
+    def currentPagePath(self) -> Path:
+        return self.pagesPath[self.currentPageIndex]
+
 
     def parseToc(self) -> list:
         tocFile = next(Path(self.tempDir).rglob('toc.ncx'), None)
@@ -78,5 +84,20 @@ class EpubParser:
         for item in self.toc:
             printTocItem(item)
 
-    def currentPagePath(self) -> Path:
-        return self.pagesPath[self.currentPageIndex]
+    def parseMeta(self) -> dict:
+        try:
+            with open(self.opfFile, 'r', encoding='utf-8') as f:
+                opfContent = f.read()
+            opfDict = xmltodict.parse(opfContent)
+            metadata = opfDict['package']['metadata']
+            meta = {}
+            for key,value in metadata.items():
+                if key.startswith("dc"):
+                    meta[key] = value
+            return meta
+        except Exception as e:
+            print(e)
+
+    
+
+
