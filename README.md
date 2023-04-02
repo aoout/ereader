@@ -40,3 +40,7 @@ Run ereader, and enter the ereader's shell.
 You can run `ereader --help` to get the help info.
 
 ![](assets/screenshot002.png)
+
+# Kanban
+
+![](assets/screenshot003.png)
