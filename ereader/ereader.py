@@ -1,7 +1,10 @@
+
 import logging
 import os
+from queue import Queue
 
 from PyQt5 import QtGui
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QApplication, QHBoxLayout
 from qframelesswindow import FramelessWindow, StandardTitleBar
 
@@ -12,10 +15,12 @@ logging.basicConfig(level=logging.INFO)
 
 
 class EReader(FramelessWindow):
+    receivedCmd = pyqtSignal(str)
 
-    def __init__(self, settings: dict = {}) -> None:
+    def __init__(self, queue: Queue, settings: dict = {}) -> None:
 
         super().__init__()
+        self.queue = queue
         self.setTitleBar(StandardTitleBar(self))
 
         self.setWindowTitle('EReader')
@@ -23,10 +28,19 @@ class EReader(FramelessWindow):
         self._resizeWindow()
         self._setLayout()
         self._setQss()
+        self.receivedCmd.connect(self.dealCmd)
 
         self.setMouseTracking(True)
 
         self.show()
+
+
+    def dealCmd(self, cmd: str) -> None:
+        print(cmd)
+        if cmd == "next":
+            self.readView.loadNextPage()
+        elif cmd == "pre":
+            self.readView.loadPrePage()
 
     def _resizeWindow(self) -> None:
         self.resize(1080, 784)

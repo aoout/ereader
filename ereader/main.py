@@ -1,3 +1,4 @@
+from queue import Queue
 import logging
 from typing import Optional
 
@@ -11,13 +12,15 @@ logging.basicConfig(level=logging.INFO)
 
 
 def run(epubPath: Optional[str] = None, fontFamily: Optional[str] = None, fontSize: Optional[int] = None):
+    queue = Queue()
     app = QApplication([])
+
     settings = {}
     if fontFamily:
         settings["fontFamily"] = fontFamily
     if fontSize:
         settings["fontSize"] = fontSize
-    ereader = EReader(settings)
+    ereader = EReader(queue,settings)
     if epubPath:
         ereader.loadEpub(epubPath)
     else:
@@ -29,7 +32,13 @@ def run(epubPath: Optional[str] = None, fontFamily: Optional[str] = None, fontSi
     if readProgress := data.get("currentReadProgress"):
         ereader.gotoReadProgress(readProgress)
 
-    app.exec_()
+    r = input('$')
+    while r != 'exit':
+        # queue.put(r)
+        ereader.receivedCmd.emit(r)
+        r =input('$')
+
+    app.exit()
     data["currentReadProgress"] = ereader.currentReadProgress()
     data.save()
     logging.shutdown()
