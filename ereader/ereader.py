@@ -1,4 +1,3 @@
-
 import logging
 import os
 from queue import Queue
@@ -11,6 +10,7 @@ from qframelesswindow import FramelessWindow, StandardTitleBar
 
 from .readview import ReadView
 from .tocview import TocView
+from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 
 logging.basicConfig(level=logging.INFO)
 
@@ -41,11 +41,13 @@ class EReader(FramelessWindow):
             readView = self.readView
 
             class Shell:
-                def next(self) -> None:
-                    readView.loadNextPage()
+                def next(self, pageNum: int = 1) -> None:
+                    readView.loadPage(
+                        readView.epubParser.currentPageIndex + pageNum)
 
-                def pre(self) -> None:
-                    readView.loadPrePage()
+                def pre(self, pageNum: int = 1) -> None:
+                    readView.loadPage(
+                        readView.epubParser.currentPageIndex - pageNum)
 
                 def home(self) -> None:
                     readView.ctrlHome()
@@ -53,16 +55,31 @@ class EReader(FramelessWindow):
                 def end(self) -> None:
                     readView.ctrlEnd()
 
+                def path(self) -> None:
+                    print(readView.epubParser.epubPath)
+
                 def toc(self) -> None:
                     readView.epubParser.printToc()
+
+                def meta(self) -> None:
+                    print(readView.epubParser.meta)
 
                 def search(self, query: str, allPages: bool = False) -> None:
                     readView.search(query, allPages)
 
+                def index(self) -> None:
+                    print(readView.epubParser.currentPageIndex)
+
+                def setFontFamily(self,family:str) -> None:
+                    QWebEngineSettings.globalSettings().setFontFamily(QWebEngineSettings.StandardFont,family)
+
+                def setFontSize(self, size: int) -> None:
+                    QWebEngineSettings.globalSettings().setFontSize(QWebEngineSettings.DefaultFontSize,size)
+
                 def exit(self) -> None:
                     ...
-                    
-            fire.Fire(name="ereader",component=Shell, command=cmd)
+
+            fire.Fire(name="ereader", component=Shell, command=cmd)
         except:
             ...
 
