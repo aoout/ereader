@@ -49,6 +49,8 @@ class EReader(FramelessWindow):
             print(self.readView.epubParser.epubPath)
         elif cmd == "toc":
             self.readView.epubParser.printToc()
+        elif cmd.split(" ")[0] == "search":
+            self.readView.search(cmd.split(" ")[1])
 
     def _resizeWindow(self) -> None:
         self.resize(1080, 784)

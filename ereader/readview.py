@@ -1,13 +1,14 @@
-import importlib.resources as res
-import logging
 import os.path
+import re
 from pathlib import Path
 from typing import Callable
 
+from bs4 import BeautifulSoup
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QFileDialog, QShortcut, QWidget
+from termcolor import colored
 
 from .epubparser import EpubParser
 from .persistentdict import data
@@ -99,6 +100,31 @@ class ReadView(WebView):
 
         
         shortcut("ctrl+end", self.ctrlEnd)
+
+    def search(self,query:str) -> None:
+        for pagePath in self.epubParser.pagesPath:
+            with open(pagePath, "r", encoding='utf-8') as f:
+                html = f.read()
+            soup = BeautifulSoup(html,"html.parser")
+            text = soup.get_text()
+            index = 0
+            while True:
+                index = text.find(query, index)
+                if index == -1:
+                    break
+                start = max(0, index - 40)
+                end = min(len(text), index + len(query) + 40)
+                context = text[start:end]
+                context = re.sub(r'\s+', '', context)
+                text_lines = context.split('\n')
+                for line in text_lines:
+                    if query in line:
+                        line = line.replace(query,colored(query,'green',attrs=['bold']))
+                    print(line)
+                print('')
+                index += len(query)
+            
+
 
     def setHtmlFromFile(self, file: Path) -> None:
 
