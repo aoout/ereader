@@ -32,11 +32,10 @@ def run(epubPath: Optional[str] = None, fontFamily: Optional[str] = None, fontSi
     if readProgress := data.get("currentReadProgress"):
         ereader.gotoReadProgress(readProgress)
 
-    r = input('$')
-    while r != 'exit':
-        # queue.put(r)
-        ereader.receivedCmd.emit(r)
+    r = ''
+    while r != 'exit' and not ereader.isClosed:
         r =input('$')
+        ereader.receivedCmd.emit(r)
 
     app.exit()
     data["currentReadProgress"] = ereader.currentReadProgress()

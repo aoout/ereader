@@ -4,7 +4,7 @@ import os
 from queue import Queue
 
 from PyQt5 import QtGui
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal,QEvent,Qt,QCoreApplication
 from PyQt5.QtWidgets import QApplication, QHBoxLayout
 from qframelesswindow import FramelessWindow, StandardTitleBar
 
@@ -20,6 +20,7 @@ class EReader(FramelessWindow):
     def __init__(self, queue: Queue, settings: dict = {}) -> None:
 
         super().__init__()
+        self.isClosed = False
         self.queue = queue
         self.setTitleBar(StandardTitleBar(self))
 
@@ -36,11 +37,18 @@ class EReader(FramelessWindow):
 
 
     def dealCmd(self, cmd: str) -> None:
-        print(cmd)
         if cmd == "next":
             self.readView.loadNextPage()
         elif cmd == "pre":
             self.readView.loadPrePage()
+        elif cmd == "home":
+            self.readView.ctrlHome()
+        elif cmd == "end":
+            self.readView.ctrlEnd()
+        elif cmd == "path":
+            print(self.readView.epubParser.epubPath)
+        elif cmd == "toc":
+            self.readView.epubParser.printToc()
 
     def _resizeWindow(self) -> None:
         self.resize(1080, 784)
@@ -81,3 +89,7 @@ class EReader(FramelessWindow):
         elif e.pos().x() > self.tocView.pos().x() + self.tocView.size().width():
             self.tocView.hide()
         return super().mouseMoveEvent(e)
+    
+    def closeEvent(self, e: QtGui.QCloseEvent) -> None:
+        super().closeEvent(e)
+        self.isClosed = True

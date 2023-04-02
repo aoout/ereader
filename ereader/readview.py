@@ -49,6 +49,12 @@ class ReadView(WebView):
         self.runINL(lambda: self.loadPage(readProgress["pageIndex"]))
         self.runALF(lambda: self.page().runJavaScript(
             f"window.scrollTo(0,{readProgress['scrollHeight']});"))
+        
+    def ctrlHome(self) -> None:
+        self.runINL(lambda: self.loadPage(0))
+
+    def ctrlEnd(self) -> None:
+        self.runINL(lambda: self.loadPage(len(self.epubParser.pagesPath) - 1))
 
     def bindShortcutKeys(self) -> None:
         def shortcut(key, func): return QShortcut(
@@ -72,6 +78,7 @@ class ReadView(WebView):
 
         def up(): return self.runINL(lambda: self.page().runJavaScript(
             "window.scrollBy(0, -window.innerHeight/20);"))
+
         def down(): return self.runINL(lambda: self.page().runJavaScript(
             "window.scrollBy(0, window.innerHeight/20);"))
 
@@ -86,11 +93,12 @@ class ReadView(WebView):
                  lambda: self.runINL(lambda: self.page().runJavaScript("window.scrollBy(0, window.innerHeight);")))
 
         shortcut("Q", lambda: QApplication.quit())
-        for i in range(10):
-            shortcut(str(i), lambda i=i: self.runINL(lambda: self.loadPage(i)))
-        shortcut("ctrl+home", lambda: self.runINL(lambda: self.loadPage(0)))
-        shortcut(
-            "ctrl+end", lambda: self.runINL(lambda: self.loadPage(len(self.epubParser.pagesPath) - 1)))
+
+        
+        shortcut("ctrl+home", self.ctrlHome)
+
+        
+        shortcut("ctrl+end", self.ctrlEnd)
 
     def setHtmlFromFile(self, file: Path) -> None:
 

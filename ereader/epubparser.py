@@ -13,7 +13,7 @@ class EpubParser:
         """
         Initialize EpubParser
         """
-        self.filename = epubPath
+        self.epubPath = epubPath
         self.tempDir = Path(tempfile.TemporaryDirectory().name)
         self.currentPageIndex = 0
         self.extract()
@@ -27,7 +27,7 @@ class EpubParser:
         if self.tempDir.exists():
             shutil.rmtree(self.tempDir)
         os.makedirs(self.tempDir)
-        with zipfile.ZipFile(self.filename, 'r') as zipRef:
+        with zipfile.ZipFile(self.epubPath, 'r') as zipRef:
             zipRef.extractall(self.tempDir)
 
     def parse(self) -> Tuple[List[Path], List[Path]]:
