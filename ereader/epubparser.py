@@ -42,7 +42,7 @@ class EpubParser:
                for item in manifest['item'] if item['@media-type'] == 'text/css']
         return pages, css
 
-    def parseToc(self) -> dict:
+    def parseToc(self) -> list:
         tocFile = next(Path(self.tempDir).rglob('toc.ncx'), None)
         with open(tocFile, 'r', encoding='utf-8') as f:
             tocContent = f.read()

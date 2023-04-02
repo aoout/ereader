@@ -11,10 +11,10 @@ class TocView(QTreeWidget):
         self.hide()
         self.setMouseTracking(True)
 
-        self.setIndentation(0)
+        self.setIndentation(6)
         self.itemClicked.connect(self.onItemClicked)
 
-    def load(self, toc: dict) -> None:
+    def load(self, toc: list) -> None:
         self.clear()
 
         def add_item(item, parent=None):
