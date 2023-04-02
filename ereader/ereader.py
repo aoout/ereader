@@ -62,7 +62,7 @@ class EReader(FramelessWindow):
                 def exit(self) -> None:
                     ...
                     
-            fire.Fire(component=Shell, command=cmd)
+            fire.Fire(name="ereader",component=Shell, command=cmd)
         except:
             ...
 
