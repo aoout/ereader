@@ -50,7 +50,7 @@ class ReadView(WebView):
         self.runINL(lambda: self.loadPage(readProgress["pageIndex"]))
         self.runALF(lambda: self.page().runJavaScript(
             f"window.scrollTo(0,{readProgress['scrollHeight']});"))
-        
+
     def ctrlHome(self) -> None:
         self.runINL(lambda: self.loadPage(0))
 
@@ -95,36 +95,39 @@ class ReadView(WebView):
 
         shortcut("Q", lambda: QApplication.quit())
 
-        
         shortcut("ctrl+home", self.ctrlHome)
 
-        
         shortcut("ctrl+end", self.ctrlEnd)
 
-    def search(self,query:str) -> None:
-        for pagePath in self.epubParser.pagesPath:
-            with open(pagePath, "r", encoding='utf-8') as f:
-                html = f.read()
-            soup = BeautifulSoup(html,"html.parser")
-            text = soup.get_text()
-            index = 0
-            while True:
-                index = text.find(query, index)
-                if index == -1:
-                    break
-                start = max(0, index - 40)
-                end = min(len(text), index + len(query) + 40)
-                context = text[start:end]
-                context = re.sub(r'\s+', '', context)
-                text_lines = context.split('\n')
-                for line in text_lines:
-                    if query in line:
-                        line = line.replace(query,colored(query,'green',attrs=['bold']))
-                    print(line)
-                print('')
-                index += len(query)
-            
+    def searchPage(self, pagePath: str, query: str) -> None:
+        with open(pagePath, "r", encoding='utf-8') as f:
+            html = f.read()
+        soup = BeautifulSoup(html, "html.parser")
+        text = soup.get_text()
+        index = 0
+        while True:
+            index = text.find(query, index)
+            if index == -1:
+                break
+            start = max(0, index - 40)
+            end = min(len(text), index + len(query) + 40)
+            context = text[start:end]
+            context = re.sub(r'\s+', '', context)
+            text_lines = context.split('\n')
+            for line in text_lines:
+                if query in line:
+                    line = line.replace(query, colored(
+                        query, 'green', attrs=['bold']))
+                print(line)
+            print('')
+            index += len(query)
 
+    def search(self, query: str, allPages: bool = False) -> None:
+        if allPages:
+            for pagePath in self.epubParser.pagesPath:
+                self.searchPage(pagePath, query)
+        else:
+            self.searchPage(self.epubParser.currentPagePath(),query)
 
     def setHtmlFromFile(self, file: Path) -> None:
 

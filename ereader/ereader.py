@@ -3,8 +3,9 @@ import logging
 import os
 from queue import Queue
 
+import fire
 from PyQt5 import QtGui
-from PyQt5.QtCore import pyqtSignal,QEvent,Qt,QCoreApplication
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QApplication, QHBoxLayout
 from qframelesswindow import FramelessWindow, StandardTitleBar
 
@@ -35,22 +36,35 @@ class EReader(FramelessWindow):
 
         self.show()
 
-
     def dealCmd(self, cmd: str) -> None:
-        if cmd == "next":
-            self.readView.loadNextPage()
-        elif cmd == "pre":
-            self.readView.loadPrePage()
-        elif cmd == "home":
-            self.readView.ctrlHome()
-        elif cmd == "end":
-            self.readView.ctrlEnd()
-        elif cmd == "path":
-            print(self.readView.epubParser.epubPath)
-        elif cmd == "toc":
-            self.readView.epubParser.printToc()
-        elif cmd.split(" ")[0] == "search":
-            self.readView.search(cmd.split(" ")[1])
+        try:
+            readView = self.readView
+
+            class Shell:
+                def next(self) -> None:
+                    readView.loadNextPage()
+
+                def pre(self) -> None:
+                    readView.loadPrePage()
+
+                def home(self) -> None:
+                    readView.ctrlHome()
+
+                def end(self) -> None:
+                    readView.ctrlEnd()
+
+                def toc(self) -> None:
+                    readView.epubParser.printToc()
+
+                def search(self, query: str, allPages: bool = False) -> None:
+                    readView.search(query, allPages)
+
+                def exit(self) -> None:
+                    ...
+                    
+            fire.Fire(component=Shell, command=cmd)
+        except:
+            ...
 
     def _resizeWindow(self) -> None:
         self.resize(1080, 784)
@@ -91,7 +105,7 @@ class EReader(FramelessWindow):
         elif e.pos().x() > self.tocView.pos().x() + self.tocView.size().width():
             self.tocView.hide()
         return super().mouseMoveEvent(e)
-    
+
     def closeEvent(self, e: QtGui.QCloseEvent) -> None:
         super().closeEvent(e)
         self.isClosed = True
