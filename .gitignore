@@ -1,3 +1,4 @@
 epub
 dist
+examples
 **/*.pyc
