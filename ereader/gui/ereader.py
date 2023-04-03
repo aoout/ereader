@@ -8,8 +8,8 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QApplication, QHBoxLayout
 from qframelesswindow import FramelessWindow, StandardTitleBar
 
-from .readview import ReadWidget
-from .tocview import TocWidget
+from .readwidget import ReadWidget
+from .tocwidget import TocWidget
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 
 logging.basicConfig(level=logging.INFO)
