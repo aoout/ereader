@@ -5,12 +5,13 @@ from queue import Queue
 import fire
 from PyQt5 import QtGui
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QHBoxLayout
 from qframelesswindow import FramelessWindow, StandardTitleBar
 
+from ..utils import data
 from .readwidget import ReadWidget
 from .tocwidget import TocWidget
-from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 
 logging.basicConfig(level=logging.INFO)
 
@@ -21,7 +22,6 @@ class EReader(FramelessWindow):
     def __init__(self, queue: Queue, settings: dict = {}) -> None:
 
         super().__init__()
-        self.isClosed = False
         self.queue = queue
         self.setTitleBar(StandardTitleBar(self))
 
@@ -70,11 +70,13 @@ class EReader(FramelessWindow):
                 def index(self) -> None:
                     print(readView.epubParser.currentPageIndex)
 
-                def setFontFamily(self,family:str) -> None:
-                    QWebEngineSettings.globalSettings().setFontFamily(QWebEngineSettings.StandardFont,family)
+                def setFontFamily(self, family: str) -> None:
+                    QWebEngineSettings.globalSettings().setFontFamily(
+                        QWebEngineSettings.StandardFont, family)
 
                 def setFontSize(self, size: int) -> None:
-                    QWebEngineSettings.globalSettings().setFontSize(QWebEngineSettings.DefaultFontSize,size)
+                    QWebEngineSettings.globalSettings().setFontSize(
+                        QWebEngineSettings.DefaultFontSize, size)
 
                 def exit(self) -> None:
                     ...
@@ -123,6 +125,11 @@ class EReader(FramelessWindow):
             self.tocView.hide()
         return super().mouseMoveEvent(e)
 
-    def closeEvent(self, e: QtGui.QCloseEvent) -> None:
-        super().closeEvent(e)
-        self.isClosed = True
+    def closeEvent(self, e: QtGui.QCloseEvent=None) -> None:
+        if e:
+            super().closeEvent(e)
+        data["currentReadProgress"] = self.currentReadProgress()
+        data.save()
+
+        print("exit")
+        exit()

@@ -33,7 +33,7 @@ def run(epubPath: Optional[str] = None, fontFamily: Optional[str] = None, fontSi
         ereader.gotoReadProgress(readProgress)
 
     r = ''
-    while r != 'exit' and not ereader.isClosed:
+    while r != 'exit':
         r =input('$')
         ereader.receivedCmd.emit(r)
 

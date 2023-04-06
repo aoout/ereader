@@ -1,6 +1,7 @@
 import os.path
 import re
 from typing import Callable
+from pathlib import Path
 
 from bs4 import BeautifulSoup
 from PyQt5 import QtCore, QtGui
@@ -90,7 +91,7 @@ class ReadWidget(WebView):
         shortcut(Qt.Key_PageDown,
                  lambda: self.runINL(lambda: self.page().runJavaScript("window.scrollBy(0, window.innerHeight);")))
 
-        shortcut("Q", lambda: QApplication.quit())
+        shortcut("Q", lambda: self.parent().closeEvent())
 
         shortcut("ctrl+home", self.ctrlHome)
 
@@ -149,7 +150,7 @@ class ReadWidget(WebView):
         self.epubParser = EpubParser(epubPath)
         self.setHtml(self.epubParser.currentPageHtml(), QtCore.QUrl.fromLocalFile(
             str(self.epubParser.currentPagePath())))
-        data["currentEpubPath"] = epubPath
+        data["currentEpubPath"] = str(Path(epubPath).resolve())
         data.save()
 
         self.parent().tocView.load(self.epubParser.toc)
